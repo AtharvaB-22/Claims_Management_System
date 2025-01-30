@@ -171,6 +171,87 @@ app.delete("/users/:id", (req, res) => {
     return res.status(200).json({ message: "User deleted successfully!" });
 });
 
+app.post("/policyholders", (req, res) => {
+    const { id, name, email, policyNumber } = req.body;
+
+    // Validate required fields
+    if (!id || !name || !email || !policyNumber) {
+        return res.status(400).json({ message: "All fields (id, name, email, policyNumber) are required." });
+    }
+
+    // Check if policyholder already exists
+    if (policyholders.some(p => p.id === id)) {
+        return res.status(400).json({ message: "Policyholder ID already exists." });
+    }
+
+    // Create and store the policyholder
+    const newPolicyholder = { id, name, email, policyNumber };
+    policyholders.push(newPolicyholder);
+
+    return res.status(201).json({ message: "Policyholder created successfully!", policyholder: newPolicyholder });
+});
+
+app.get("/policyholders", (req, res) => {
+    if (policyholders.length === 0) {
+        return res.status(404).json({ message: "No policyholders found." });
+    }
+    return res.status(200).json(policyholders);
+});
+
+app.get("/policyholders/:id", (req, res) => {
+    const policyholderId = parseInt(req.params.id); // Convert ID to integer
+    const policyholder = policyholders.find(p => p.id === policyholderId);
+
+    if (!policyholder) {
+        return res.status(404).json({ message: "Policyholder not found." });
+    }
+
+    return res.status(200).json(policyholder);
+});
+
+app.put("/policyholders/:id", (req, res) => {
+    const policyholderId = parseInt(req.params.id); // Convert ID to integer
+    const { name, email, policyNumber } = req.body;
+
+    // Find the policyholder
+    const policyholder = policyholders.find(p => p.id === policyholderId);
+    if (!policyholder) {
+        return res.status(404).json({ message: "Policyholder not found." });
+    }
+
+    // Validate input
+    if (!name && !email && !policyNumber) {
+        return res.status(400).json({ message: "At least one field (name, email, or policyNumber) is required for update." });
+    }
+
+    // Check for duplicate email
+    if (email && policyholders.some(p => p.email === email && p.id !== policyholderId)) {
+        return res.status(400).json({ message: "Email already in use by another policyholder." });
+    }
+
+    // Update policyholder details
+    if (name) policyholder.name = name;
+    if (email) policyholder.email = email;
+    if (policyNumber) policyholder.policyNumber = policyNumber;
+
+    return res.status(200).json({ message: "Policyholder updated successfully!", policyholder });
+});
+
+app.delete("/policyholders/:id", (req, res) => {
+    const policyholderId = parseInt(req.params.id); // Convert ID to integer
+    
+    // Find policyholder index
+    const policyholderIndex = policyholders.findIndex(p => p.id === policyholderId);
+    
+    if (policyholderIndex === -1) {
+        return res.status(404).json({ message: "Policyholder not found." });
+    }
+
+    // Remove policyholder from the array
+    policyholders.splice(policyholderIndex, 1);
+
+    return res.status(200).json({ message: "Policyholder deleted successfully!" });
+});
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
