@@ -37,7 +37,7 @@ function deleteUser(id) {
 }
 
 const policyholders=[];
-
+//create
 function createPolicyholder(id,userid,phone,address){
     const policyholder={ id,userid,phone,address };
     policyholders.push(policyholder);
@@ -46,6 +46,33 @@ function createPolicyholder(id,userid,phone,address){
 // Creates a new policyholder, links it to a User (userId), and adds it to policyholders.
 // Returns the newly created policyholder
 
+//read
+function getPolicyholders() {
+    return policyholders;
+}
+
+function getPolicyholderById(id){
+    return policyholders.find(policyholder => policyholder.id === id) || null;
+}
+
+//Update
+function updatePolicyholder(id, newData) {
+    const policyholder = policyholders.find(policyholder => policyholder.id === id);
+    if (policyholder) {
+        Object.assign(policyholder, newData); // Update only provided fields
+        return policyholder;
+    }
+    return null;
+}
+
+// Delete
+function deletePolicyholder(id) {
+    const index = policyholders.findIndex(policyholder => policyholder.id === id);
+    if (index !== -1) {
+        return policyholders.splice(index, 1)[0]; // Remove policyholder
+    }
+    return null;
+}
 const policies=[];
 
 function createPolicy(id,policyholderId,type,premiumAmt,coverageAmt,status){
@@ -71,6 +98,6 @@ function createDocument(id, claimId, documentType, documentURL) {
     supportingDocuments.push(document);
     return document;
 }
-module.exports = { users, createUser,policyholders,createPolicyholder,policies,createPolicy,claims,createClaim,
-    supportingDocuments,createDocument,getUserByID,getUsers,updateUser,deleteUser };
+module.exports = { users, createUser,getUserByID,getUsers,updateUser,deleteUser,
+    policyholders,createPolicyholder,getPolicyholders,updatePolicyholder,deletePolicyholder,getPolicyholderById };
 
