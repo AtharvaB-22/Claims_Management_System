@@ -173,10 +173,30 @@ function deleteSupportingDocument(id) {
     return null;
 }
 
+function reviewClaim(adminId, claimId, newStatus) {
+    const admin = users.find(user => user.id === adminId && user.role === "admin");
+    if (!admin) {
+        return "Error: Only admins can review claims.";
+    }
+
+    const claim = claims.find(claim => claim.id === claimId);
+    if (!claim) {
+        return "Error: Claim not found.";
+    }
+
+    if (!["approved", "rejected"].includes(newStatus)) {
+        return "Error: Invalid status. Must be 'approved' or 'rejected'.";
+    }
+
+    claim.status = newStatus;
+    return claim;
+}
+
 module.exports = { users, createUser,getUserByID,getUsers,updateUser,deleteUser,
     policyholders,createPolicyholder,getPolicyholders,updatePolicyholder,deletePolicyholder,getPolicyholderById,
     policies,createPolicy,getPolicies,getPolicyById,updatePolicy,deletePolicy,
     claims,createClaim,getClaims,getClaimById,updateClaim,deleteClaim,
     supportingDocuments,createDocument,getSupportingDocuments,getSupportingDocumentById,
-    updateSupportingDocument,deleteSupportingDocument };
+    updateSupportingDocument,deleteSupportingDocument,
+reviewClaim};
 

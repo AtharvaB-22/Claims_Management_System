@@ -14,6 +14,7 @@ const {
 const { 
     createDocument, supportingDocuments,getSupportingDocuments,getSupportingDocumentById,
 updateSupportingDocument,deleteSupportingDocument } = require("./entities");
+const { reviewClaim } = require("./entities");
 
 const app = express();
 const PORT = 3000;
@@ -57,10 +58,12 @@ app.get("/", (req, res) => {
     // const deletedClaim = deleteClaim(2);
     // console.log(claims);
 
-    const allDocuments = getSupportingDocuments();
-    const foundDocument = getSupportingDocumentById(1);
-    const updatedDocument = updateSupportingDocument(1, { documentUrl: "http://example.com/updated_report1.pdf" });
-    const deletedDocument = deleteSupportingDocument(2);
+    // const allDocuments = getSupportingDocuments();
+    // const foundDocument = getSupportingDocumentById(1);
+    // const updatedDocument = updateSupportingDocument(1, { documentUrl: "http://example.com/updated_report1.pdf" });
+    // const deletedDocument = deleteSupportingDocument(2);
+
+    const adminReview = reviewClaim(user2.id, claim1.id, "approved");
 
 
 
@@ -68,14 +71,11 @@ app.get("/", (req, res) => {
     // console.log(policyholders);
     // console.log(policies);
     // console.log(claims);
-    console.log(supportingDocuments);
+    // console.log(supportingDocuments);
 
     res.json({
         message: "CRUD operations tested!",
-        allDocuments,
-        foundDocument,
-        updatedDocument,
-        deletedDocument
+        adminReview
     });
 });
 
