@@ -3,6 +3,9 @@ const users = [];
 
 // Create
 function createUser(id, name, email, role) {
+    if (users.some(user => user.email === email)) {
+        return "Error: A user with this email already exists.";
+    }
     const user = { id, name, email, role };
     users.push(user);
     return user;
@@ -39,6 +42,9 @@ function deleteUser(id) {
 const policyholders=[];
 //create
 function createPolicyholder(id,userid,phone,address){
+    if (!users.some(user => user.id === userid)) {
+        return "Error: Policyholder must be linked to an existing User.";
+    }
     const policyholder={ id,userid,phone,address };
     policyholders.push(policyholder);
     return policyholder;
@@ -76,6 +82,14 @@ function deletePolicyholder(id) {
 const policies=[];
 
 function createPolicy(id,policyholderId,type,premiumAmt,coverageAmt,status){
+
+    if (!policyholders.some(policyholder => policyholder.id === policyholderId)) {
+        return "Error: Policy must be linked to a valid Policyholder.";
+    }
+
+    if (coverageAmt <= 0) {
+        return "Error: Coverage amount must be greater than 0.";
+    }
     const policy={ id,policyholderId,type,premiumAmt,coverageAmt,status };
     policies.push(policy);
     return policy;
@@ -109,6 +123,13 @@ function deletePolicy(id) {
 const claims=[];
 
 function createClaim(id,policyholderId,policyId,claimAmt,filedDate,status,claimReview){
+    const policy = policies.find(policy => policy.id === policyId);
+    if (!policy) {
+        return "Error: Claim must be linked to a valid Policy.";
+    }
+    if (claimAmt > policy.coverageAmount) {
+        return "Error: Claim amount cannot exceed the policy’s coverage amount.";
+    }
     const claim= { id,policyholderId,policyId,claimAmt,filedDate,status,claimReview };
     claims.push(claim);
     return claim;
@@ -143,6 +164,15 @@ function deleteClaim(id) {
 const supportingDocuments = [];
 
 function createDocument(id, claimId, documentType, documentURL) {
+    if (!claims.some(claim => claim.id === claimId)) {
+        return "Error: Document must be linked to a valid Claim."
+    }
+    const allowedTypes = ["pdf", "jpeg", "jpg", "png"];
+    const fileExtension = documentURL.split(".").pop().toLowerCase();
+
+    if (!allowedTypes.includes(fileExtension)) {
+        return "Error: Invalid document type. Allowed types: PDF, JPEG, PNG.";
+    }
     const document = { id, claimId, documentType, documentURL };
     supportingDocuments.push(document);
     return document;
