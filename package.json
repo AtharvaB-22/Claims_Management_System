@@ -1,0 +1,29 @@
+{
+  "name": "claims_management_system",
+  "version": "1.0.0",
+  "description": "Added a new branch named 'new_branch'to the repository This line was added to demonstrate committing changes in Git. This change is resolved after merging conflict-branch into main.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start":"node index.js",
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AtharvaB-22/Claims_Management_System.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AtharvaB-22/Claims_Management_System/issues"
+  },
+  "homepage": "https://github.com/AtharvaB-22/Claims_Management_System#readme",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
