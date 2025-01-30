@@ -91,6 +91,86 @@ app.get("/", (req, res) => {
     });
 });
 
+app.get("/users", (req, res) => {
+    if (users.length === 0) {
+        return res.status(404).json({ message: "No users found." });
+    }
+    return res.status(200).json(users);
+});
+app.post("/users", (req, res) => {
+    const { id, name, email, role } = req.body;
+
+    // Validate required fields
+    if (!id || !name || !email || !role) {
+        return res.status(400).json({ error: "All fields (id, name, email, role) are required." });
+    }
+
+    // Create user
+    const result = createUser(id, name, email, role);
+
+    // If there's an error (e.g., duplicate email), return error response
+    if (typeof result === "string") {
+        return res.status(400).json({ error: result });
+    }
+
+    return res.status(201).json({ message: "User created successfully!", user: result });
+});
+// Get users api by id 
+app.get("/users/:id", (req, res) => {
+    const userId = parseInt(req.params.id); // Convert ID to integer
+    const user = users.find(user => user.id === userId);
+
+    if (!user) {
+        return res.status(404).json({ message: "User not found." });
+    }
+
+    return res.status(200).json(user);
+});
+
+app.put("/users/:id", (req, res) => {
+    const userId = parseInt(req.params.id); // Convert ID to integer
+    const { name, email } = req.body;
+
+    // Find the user
+    const user = users.find(user => user.id === userId);
+    if (!user) {
+        return res.status(404).json({ message: "User not found." });
+    }
+
+    // Validate input
+    if (!name && !email) {
+        return res.status(400).json({ message: "At least one field (name or email) is required for update." });
+    }
+
+    // Check for duplicate email
+    if (email && users.some(u => u.email === email && u.id !== userId)) {
+        return res.status(400).json({ message: "Email already in use by another user." });
+    }
+
+    // Update user details
+    if (name) user.name = name;
+    if (email) user.email = email;
+
+    return res.status(200).json({ message: "User updated successfully!", user });
+});
+
+//delete user
+app.delete("/users/:id", (req, res) => {
+    const userId = parseInt(req.params.id); // Convert ID to integer
+    
+    // Find user index
+    const userIndex = users.findIndex(user => user.id === userId);
+    
+    if (userIndex === -1) {
+        return res.status(404).json({ message: "User not found." });
+    }
+
+    // Remove user from the array
+    users.splice(userIndex, 1);
+
+    return res.status(200).json({ message: "User deleted successfully!" });
+});
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
