@@ -115,6 +115,31 @@ function createClaim(id,policyholderId,policyId,claimAmt,filedDate,status,claimR
 }// id is unique id, policyholderId is policyholderId,policyId is policyId,claimAmt is amount claimed,
 // filedDate-Claim filed date, status is status of claim , claimReview is update about claimReview
 
+function getClaims() {
+    return claims;
+}
+
+function getClaimById(id) {
+    return claims.find(claim => claim.id === id) || null;
+}
+
+function updateClaim(id, newData) {
+    const claim = claims.find(claim => claim.id === id);
+    if (claim) {
+        Object.assign(claim, newData); // Update only provided fields
+        return claim;
+    }
+    return null;
+}
+
+function deleteClaim(id) {
+    const index = claims.findIndex(claim => claim.id === id);
+    if (index !== -1) {
+        return claims.splice(index, 1)[0]; // Remove claim
+    }
+    return null;
+}
+
 const supportingDocuments = [];
 
 function createDocument(id, claimId, documentType, documentURL) {
@@ -124,5 +149,6 @@ function createDocument(id, claimId, documentType, documentURL) {
 }
 module.exports = { users, createUser,getUserByID,getUsers,updateUser,deleteUser,
     policyholders,createPolicyholder,getPolicyholders,updatePolicyholder,deletePolicyholder,getPolicyholderById,
-    policies,createPolicy,getPolicies,getPolicyById,updatePolicy,deletePolicy };
+    policies,createPolicy,getPolicies,getPolicyById,updatePolicy,deletePolicy,
+    claims,createClaim,getClaims,getClaimById,updateClaim,deleteClaim };
 

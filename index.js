@@ -8,7 +8,9 @@ const {
 const { 
     createPolicy, policies,getPolicies,getPolicyById,updatePolicy,deletePolicy 
 } = require("./entities"); 
-const { createClaim, claims } = require("./entities");
+const { 
+    createClaim, claims,getClaimById,getClaims,updateClaim,deleteClaim 
+} = require("./entities");
 const { createDocument, supportingDocuments } = require("./entities");
 
 const app = express();
@@ -37,12 +39,19 @@ app.get("/", (req, res) => {
     // const updatedPolicyholder = updatePolicyholder(1, { address: "Gurgaon" });
     // const deletedPolicyholder = deletePolicyholder(2);
 
-    const allPolicies=getPolicies();
-    const foundPolicy = getPolicyById(1);
-    const updatedPolicy = updatePolicy(1, { coverageAmount: 75000 });
-    const deletedPolicy = deletePolicy(2);
+    // const allPolicies=getPolicies();
+    // const foundPolicy = getPolicyById(1);
+    // const updatedPolicy = updatePolicy(1, { coverageAmount: 75000 });
+    // const deletedPolicy = deletePolicy(2);
 
-    console.log(policies);
+    const claim1 = createClaim(1, policy1.id, 10000, "pending");
+    const claim2 = createClaim(2, policy2.id, 20000, "approved");
+
+    const allClaims = getClaims();
+    const foundClaim = getClaimById(1);
+    const updatedClaim = updateClaim(1, { status: "approved" });
+    const deletedClaim = deleteClaim(2);
+    console.log(claims);
 
 
 
@@ -54,10 +63,11 @@ app.get("/", (req, res) => {
 
     res.json({
         message: "CRUD operations tested!",
-        allPolicies,
-        foundPolicy,
-        updatedPolicy,
-        deletedPolicy
+        allClaims,
+        foundClaim,
+        updatedClaim,
+        deletedClaim
+
     });
 });
 
