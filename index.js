@@ -11,7 +11,9 @@ const {
 const { 
     createClaim, claims,getClaimById,getClaims,updateClaim,deleteClaim 
 } = require("./entities");
-const { createDocument, supportingDocuments } = require("./entities");
+const { 
+    createDocument, supportingDocuments,getSupportingDocuments,getSupportingDocumentById,
+updateSupportingDocument,deleteSupportingDocument } = require("./entities");
 
 const app = express();
 const PORT = 3000;
@@ -28,6 +30,11 @@ app.get("/", (req, res) => {
     const policy1 = createPolicy(1, policyholder1.id, "Health", 50000, 500);
     const policy2 = createPolicy(2, policyholder2.id, "Vehicle", 100000, 700);
 
+    const claim1 = createClaim(1, policy1.id, 10000, "pending");
+    const claim2 = createClaim(2, policy2.id, 20000, "approved");
+
+    const document1 = createDocument(1, claim1.id, "Medical Report", "http://example.com/report1.pdf");
+    const document2 = createDocument(2, claim2.id, "Accident Proof", "http://example.com/proof2.jpg");
 
     // const allUsers = getUsers();
     // const foundUser=(2);
@@ -44,14 +51,16 @@ app.get("/", (req, res) => {
     // const updatedPolicy = updatePolicy(1, { coverageAmount: 75000 });
     // const deletedPolicy = deletePolicy(2);
 
-    const claim1 = createClaim(1, policy1.id, 10000, "pending");
-    const claim2 = createClaim(2, policy2.id, 20000, "approved");
+    // const allClaims = getClaims();
+    // const foundClaim = getClaimById(1);
+    // const updatedClaim = updateClaim(1, { status: "approved" });
+    // const deletedClaim = deleteClaim(2);
+    // console.log(claims);
 
-    const allClaims = getClaims();
-    const foundClaim = getClaimById(1);
-    const updatedClaim = updateClaim(1, { status: "approved" });
-    const deletedClaim = deleteClaim(2);
-    console.log(claims);
+    const allDocuments = getSupportingDocuments();
+    const foundDocument = getSupportingDocumentById(1);
+    const updatedDocument = updateSupportingDocument(1, { documentUrl: "http://example.com/updated_report1.pdf" });
+    const deletedDocument = deleteSupportingDocument(2);
 
 
 
@@ -59,15 +68,14 @@ app.get("/", (req, res) => {
     // console.log(policyholders);
     // console.log(policies);
     // console.log(claims);
-    // console.log(supportingDocuments);
+    console.log(supportingDocuments);
 
     res.json({
         message: "CRUD operations tested!",
-        allClaims,
-        foundClaim,
-        updatedClaim,
-        deletedClaim
-
+        allDocuments,
+        foundDocument,
+        updatedDocument,
+        deletedDocument
     });
 });
 

@@ -147,8 +147,36 @@ function createDocument(id, claimId, documentType, documentURL) {
     supportingDocuments.push(document);
     return document;
 }
+
+function getSupportingDocuments() {
+    return supportingDocuments;
+}
+
+function getSupportingDocumentById(id) {
+    return supportingDocuments.find(document => document.id === id) || null;
+}
+
+function updateSupportingDocument(id, newData) {
+    const document = supportingDocuments.find(document => document.id === id);
+    if (document) {
+        Object.assign(document, newData); // Update only provided fields
+        return document;
+    }
+    return null;
+}
+
+function deleteSupportingDocument(id) {
+    const index = supportingDocuments.findIndex(document => document.id === id);
+    if (index !== -1) {
+        return supportingDocuments.splice(index, 1)[0]; // Remove document
+    }
+    return null;
+}
+
 module.exports = { users, createUser,getUserByID,getUsers,updateUser,deleteUser,
     policyholders,createPolicyholder,getPolicyholders,updatePolicyholder,deletePolicyholder,getPolicyholderById,
     policies,createPolicy,getPolicies,getPolicyById,updatePolicy,deletePolicy,
-    claims,createClaim,getClaims,getClaimById,updateClaim,deleteClaim };
+    claims,createClaim,getClaims,getClaimById,updateClaim,deleteClaim,
+    supportingDocuments,createDocument,getSupportingDocuments,getSupportingDocumentById,
+    updateSupportingDocument,deleteSupportingDocument };
 
