@@ -81,6 +81,30 @@ function createPolicy(id,policyholderId,type,premiumAmt,coverageAmt,status){
     return policy;
 }  // id is unique id, policyholderId is policyholderId, type is type of policy,premiumAmt is amt paid by customer
 // Coverage amt is the amt covered,status - active or expired
+function getPolicies() {
+    return policies;
+}
+
+function getPolicyById(id) {
+    return policies.find(policy => policy.id === id) || null;
+}
+
+function updatePolicy(id, newData) {
+    const policy = policies.find(policy => policy.id === id);
+    if (policy) {
+        Object.assign(policy, newData); // Update only provided fields
+        return policy;
+    }
+    return null;
+}
+
+function deletePolicy(id) {
+    const index = policies.findIndex(policy => policy.id === id);
+    if (index !== -1) {
+        return policies.splice(index, 1)[0]; // Remove policy
+    }
+    return null;
+}
 
 const claims=[];
 
@@ -99,5 +123,6 @@ function createDocument(id, claimId, documentType, documentURL) {
     return document;
 }
 module.exports = { users, createUser,getUserByID,getUsers,updateUser,deleteUser,
-    policyholders,createPolicyholder,getPolicyholders,updatePolicyholder,deletePolicyholder,getPolicyholderById };
+    policyholders,createPolicyholder,getPolicyholders,updatePolicyholder,deletePolicyholder,getPolicyholderById,
+    policies,createPolicy,getPolicies,getPolicyById,updatePolicy,deletePolicy };
 

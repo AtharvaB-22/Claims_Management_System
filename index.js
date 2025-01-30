@@ -5,7 +5,9 @@ const {
 const { 
     createPolicyholder, policyholders,getPolicyholders,updatePolicyholder,deletePolicyholder,getPolicyholderById
  } = require("./entities"); // imports policyholder functions
-const { createPolicy, policies } = require("./entities"); 
+const { 
+    createPolicy, policies,getPolicies,getPolicyById,updatePolicy,deletePolicy 
+} = require("./entities"); 
 const { createClaim, claims } = require("./entities");
 const { createDocument, supportingDocuments } = require("./entities");
 
@@ -21,17 +23,27 @@ app.get("/", (req, res) => {
     const policyholder1 = createPolicyholder(1, user1.id, "9876543210", "Noida");
     const policyholder2 = createPolicyholder(2, user2.id, "8765432109", "G.Noida");
 
+    const policy1 = createPolicy(1, policyholder1.id, "Health", 50000, 500);
+    const policy2 = createPolicy(2, policyholder2.id, "Vehicle", 100000, 700);
+
+
     // const allUsers = getUsers();
     // const foundUser=(2);
     // const updatedUser=updateUser(1, { name:"Atharva"});
     // const deletedUser=deleteUser(2);
 
-    const allPolicyholders = getPolicyholders();
-    const foundPolicyholder = getPolicyholderById(1);
-    const updatedPolicyholder = updatePolicyholder(1, { address: "Gurgaon" });
-    const deletedPolicyholder = deletePolicyholder(2);
+    // const allPolicyholders = getPolicyholders();
+    // const foundPolicyholder = getPolicyholderById(1);
+    // const updatedPolicyholder = updatePolicyholder(1, { address: "Gurgaon" });
+    // const deletedPolicyholder = deletePolicyholder(2);
 
-    console.log(policyholders);
+    const allPolicies=getPolicies();
+    const foundPolicy = getPolicyById(1);
+    const updatedPolicy = updatePolicy(1, { coverageAmount: 75000 });
+    const deletedPolicy = deletePolicy(2);
+
+    console.log(policies);
+
 
 
     // console.log(users);
@@ -42,10 +54,10 @@ app.get("/", (req, res) => {
 
     res.json({
         message: "CRUD operations tested!",
-        allPolicyholders,
-        foundPolicyholder,
-        updatedPolicyholder,
-        deletedPolicyholder
+        allPolicies,
+        foundPolicy,
+        updatedPolicy,
+        deletedPolicy
     });
 });
 
