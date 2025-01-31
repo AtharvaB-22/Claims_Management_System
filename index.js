@@ -333,6 +333,86 @@ app.delete("/policies/:id", (req, res) => {
     });
 });
 
+
+app.post("/claims", (req, res) => {
+    const { id, policyId, status, amount, description } = req.body;
+
+    // Validate required fields
+    if (!id || !policyId || !status || !amount || !description) {
+        return res.status(400).json({ message: "All fields (id, policyId, status, amount, description) are required." });
+    }
+
+    // Check if claim already exists
+    if (claims.some(c => c.id === id)) {
+        return res.status(400).json({ message: "Claim ID already exists." });
+    }
+
+    // Create and store the claim
+    const newClaim = { id, policyId, status, amount, description };
+    claims.push(newClaim);
+
+    return res.status(201).json({ message: "Claim created successfully!", claim: newClaim });
+});
+
+app.get("/claims", (req, res) => {
+    if (claims.length === 0) {
+        return res.status(404).json({ message: "No claims found." });
+    }
+    return res.status(200).json(claims);
+});
+
+app.get("/claims/:id", (req, res) => {
+    const claimId = parseInt(req.params.id); // Convert ID to integer
+    const claim = claims.find(c => c.id === claimId);
+
+    if (!claim) {
+        return res.status(404).json({ message: "Claim not found." });
+    }
+
+    return res.status(200).json(claim);
+});
+
+app.put("/claims/:id", (req, res) => {
+    const claimId = parseInt(req.params.id); // Convert ID to integer
+    const { status, amount, description } = req.body;
+
+    // Find the claim
+    const claim = claims.find(c => c.id === claimId);
+    if (!claim) {
+        return res.status(404).json({ message: "Claim not found." });
+    }
+
+    // Validate input
+    if (!status && !amount && !description) {
+        return res.status(400).json({ message: "At least one field (status, amount, or description) is required for update." });
+    }
+
+    // Update claim details
+    if (status) claim.status = status;
+    if (amount) claim.amount = amount;
+    if (description) claim.description = description;
+
+    return res.status(200).json({ message: "Claim updated successfully!", claim });
+});
+
+app.delete("/claims/:id", (req, res) => {
+    const claimId = parseInt(req.params.id); // Convert ID to integer
+
+    // Find claim index
+    const claimIndex = claims.findIndex(c => c.id === claimId);
+    if (claimIndex === -1) {
+        return res.status(404).json({ message: "Claim not found." });
+    }
+
+    // Remove claim from the array
+    const deletedClaim = claims.splice(claimIndex, 1)[0];
+
+    return res.status(200).json({ 
+        message: "Claim deleted successfully!",
+        deletedClaim
+    });
+});
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
