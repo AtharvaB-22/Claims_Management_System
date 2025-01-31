@@ -25,3 +25,13 @@ const UserSchema = new mongoose.Schema({
 
 // Export the User Model
 module.exports = mongoose.model('User', UserSchema);
+
+
+// const mongoose = require('mongoose');	Imports Mongoose for schema definition.
+// const UserSchema = new mongoose.Schema({...})	Creates a schema to define user structure.
+// name: { type: String, required: true }	Ensures every user has a name.
+// email: { type: String, required: true, unique: true, lowercase: true }	Stores email uniquely & makes it lowercase for consistency.
+// password: { type: String, required: true }	Stores hashed password securely.
+// role: { type: String, enum: ['admin', 'policyholder'], required: true }	Restricts role values to only admin or policyholder.
+// { timestamps: true }	Automatically stores createdAt & updatedAt timestamps.
+// module.exports = mongoose.model('User', UserSchema);	Exports the schema so it can be used elsewhere in the project.
