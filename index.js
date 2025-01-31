@@ -1,4 +1,7 @@
 const express = require("express");
+const connectDB = require('./config/db');
+connectDB();
+const User = require('./models/User');
 const { 
     createUser, getUsers, getUserByID, updateUser, deleteUser, users 
 } = require("./entities");
