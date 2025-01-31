@@ -253,6 +253,7 @@ app.delete("/policyholders/:id", (req, res) => {
     return res.status(200).json({ message: "Policyholder deleted successfully!" });
 });
 
+
 app.post("/policies", (req, res) => {
     const { id, policyholderId, type, coverageAmount, premium } = req.body;
 
@@ -333,7 +334,6 @@ app.delete("/policies/:id", (req, res) => {
     });
 });
 
-
 app.post("/claims", (req, res) => {
     const { id, policyId, status, amount, description } = req.body;
 
@@ -413,6 +413,87 @@ app.delete("/claims/:id", (req, res) => {
     });
 });
 
+
+const documents = []; // In-memory storage for documents
+
+app.post("/documents", (req, res) => {
+    const { id, claimId, type, filename, url } = req.body;
+
+    // Validate required fields
+    if (!id || !claimId || !type || !filename || !url) {
+        return res.status(400).json({ message: "All fields (id, claimId, type, filename, url) are required." });
+    }
+
+    // Check if document already exists
+    if (documents.some(d => d.id === id)) {
+        return res.status(400).json({ message: "Document ID already exists." });
+    }
+
+    // Create and store the document
+    const newDocument = { id, claimId, type, filename, url };
+    documents.push(newDocument);
+
+    return res.status(201).json({ message: "Document uploaded successfully!", document: newDocument });
+});
+
+app.get("/documents", (req, res) => {
+    if (documents.length === 0) {
+        return res.status(404).json({ message: "No documents found." });
+    }
+    return res.status(200).json(documents);
+});
+
+app.get("/documents/:id", (req, res) => {
+    const documentId = parseInt(req.params.id); // Convert ID to integer
+    const document = documents.find(d => d.id === documentId);
+
+    if (!document) {
+        return res.status(404).json({ message: "Document not found." });
+    }
+
+    return res.status(200).json(document);
+});
+
+app.put("/documents/:id", (req, res) => {
+    const documentId = parseInt(req.params.id); // Convert ID to integer
+    const { type, filename, url } = req.body;
+
+    // Find the document
+    const document = documents.find(d => d.id === documentId);
+    if (!document) {
+        return res.status(404).json({ message: "Document not found." });
+    }
+
+    // Validate input
+    if (!type && !filename && !url) {
+        return res.status(400).json({ message: "At least one field (type, filename, or url) is required for update." });
+    }
+
+    // Update document details
+    if (type) document.type = type;
+    if (filename) document.filename = filename;
+    if (url) document.url = url;
+
+    return res.status(200).json({ message: "Document updated successfully!", document });
+});
+
+app.delete("/documents/:id", (req, res) => {
+    const documentId = parseInt(req.params.id); // Convert ID to integer
+
+    // Find document index
+    const documentIndex = documents.findIndex(d => d.id === documentId);
+    if (documentIndex === -1) {
+        return res.status(404).json({ message: "Document not found." });
+    }
+
+    // Remove document from the array
+    const deletedDocument = documents.splice(documentIndex, 1)[0];
+
+    return res.status(200).json({ 
+        message: "Document deleted successfully!",
+        deletedDocument
+    });
+});
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
