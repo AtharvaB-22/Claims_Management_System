@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 
 // Define the User Schema
 const UserSchema = new mongoose.Schema({
+    userId: {
+        type: Number,
+        unique: true // Ensures IDs are not duplicated
+    },
     name: {
         type: String,
         required: true

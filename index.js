@@ -1,6 +1,7 @@
 const express = require("express");
 const connectDB = require('./config/db');
 connectDB();
+const bcrypt = require('bcryptjs'); // Import bcrypt for password hashing
 const User = require('./models/User');
 const { 
     createUser, getUsers, getUserByID, updateUser, deleteUser, users 
@@ -94,84 +95,105 @@ app.get("/", (req, res) => {
     });
 });
 
-app.get("/users", (req, res) => {
-    if (users.length === 0) {
-        return res.status(404).json({ message: "No users found." });
+
+app.post('/users', async (req, res) => {
+    try {
+        const { name, email, password, role } = req.body;
+
+        // Check if email already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ error: 'Email is already in use' });
+        }
+
+        // Find the highest userId and increment it
+        const lastUser = await User.findOne().sort({ userId: -1 });
+
+        // Ensure that lastUser exists before incrementing
+        const newUserId = lastUser && lastUser.userId ? lastUser.userId + 1 : 1;
+
+        // Check if newUserId is valid
+        if (isNaN(newUserId)) {
+            return res.status(500).json({ error: "Failed to generate userId" });
+        }
+
+        // Hash password before saving
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // Create the new user with the generated userId
+        const newUser = new User({
+            userId: newUserId,
+            name,
+            email,
+            password: hashedPassword,
+            role
+        });
+
+        await newUser.save();
+        res.status(201).json({ message: 'User registered successfully', user: newUser });
+
+    } catch (error) {
+        console.error("Error in User Registration:", error);
+        res.status(500).json({ error: 'Internal Server Error', details: error.message });
     }
-    return res.status(200).json(users);
 });
-app.post("/users", (req, res) => {
-    const { id, name, email, role } = req.body;
-
-    // Validate required fields
-    if (!id || !name || !email || !role) {
-        return res.status(400).json({ error: "All fields (id, name, email, role) are required." });
-    }
-
-    // Create user
-    const result = createUser(id, name, email, role);
-
-    // If there's an error (e.g., duplicate email), return error response
-    if (typeof result === "string") {
-        return res.status(400).json({ error: result });
-    }
-
-    return res.status(201).json({ message: "User created successfully!", user: result });
-});
+// await bcrypt.genSalt(10);	Generates a salt for hashing the password.
+// await bcrypt.hash(password, salt);	Encrypts the password before saving.
 // Get users api by id 
-app.get("/users/:id", (req, res) => {
-    const userId = parseInt(req.params.id); // Convert ID to integer
-    const user = users.find(user => user.id === userId);
-
-    if (!user) {
-        return res.status(404).json({ message: "User not found." });
+app.get('/users', async (req, res) => {
+    try {
+        const users = await User.find(); // Fetch all users from MongoDB
+        res.status(200).json(users);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
     }
+});
+app.get('/users/:id', async (req, res) => {
+    try {
+        const user = await User.findOne({ userId: req.params.id }); // Fetch using userId
 
-    return res.status(200).json(user);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
 
-app.put("/users/:id", (req, res) => {
-    const userId = parseInt(req.params.id); // Convert ID to integer
-    const { name, email } = req.body;
+app.put('/users/:id', async (req, res) => {
+    try {
+        const updatedUser = await User.findOneAndUpdate(
+            { userId: req.params.id }, // Find by userId
+            req.body, 
+            { new: true }
+        );
 
-    // Find the user
-    const user = users.find(user => user.id === userId);
-    if (!user) {
-        return res.status(404).json({ message: "User not found." });
+        if (!updatedUser) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.status(200).json({ message: 'User updated successfully', user: updatedUser });
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
     }
-
-    // Validate input
-    if (!name && !email) {
-        return res.status(400).json({ message: "At least one field (name or email) is required for update." });
-    }
-
-    // Check for duplicate email
-    if (email && users.some(u => u.email === email && u.id !== userId)) {
-        return res.status(400).json({ message: "Email already in use by another user." });
-    }
-
-    // Update user details
-    if (name) user.name = name;
-    if (email) user.email = email;
-
-    return res.status(200).json({ message: "User updated successfully!", user });
 });
 
 //delete user
-app.delete("/users/:id", (req, res) => {
-    const userId = parseInt(req.params.id); // Convert ID to integer
-    
-    // Find user index
-    const userIndex = users.findIndex(user => user.id === userId);
-    
-    if (userIndex === -1) {
-        return res.status(404).json({ message: "User not found." });
+app.delete('/users/:id', async (req, res) => {
+    try {
+        const deletedUser = await User.findOneAndDelete({ userId: req.params.id });
+
+        if (!deletedUser) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.status(200).json({ message: 'User deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
     }
-
-    // Remove user from the array
-    users.splice(userIndex, 1);
-
-    return res.status(200).json({ message: "User deleted successfully!" });
 });
 
 app.post("/policyholders", (req, res) => {
@@ -194,67 +216,79 @@ app.post("/policyholders", (req, res) => {
     return res.status(201).json({ message: "Policyholder created successfully!", policyholder: newPolicyholder });
 });
 
-app.get("/policyholders", (req, res) => {
-    if (policyholders.length === 0) {
-        return res.status(404).json({ message: "No policyholders found." });
+app.get('/policyholders', async (req, res) => {
+    try {
+        // Find all users where role is 'policyholder'
+        const policyholders = await User.find({ role: "policyholder" }).select("-password");
+        
+        // Return the list of policyholders
+        res.status(200).json(policyholders);
+    } catch (error) {
+        // Handle errors
+        res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
-    return res.status(200).json(policyholders);
 });
 
-app.get("/policyholders/:id", (req, res) => {
-    const policyholderId = parseInt(req.params.id); // Convert ID to integer
-    const policyholder = policyholders.find(p => p.id === policyholderId);
+app.get('/policyholders/:id', async (req, res) => {
+    try {
+        // Find a policyholder by userId where role is "policyholder"
+        const policyholder = await User.findOne({ userId: req.params.id, role: "policyholder" }).select("-password");
 
-    if (!policyholder) {
-        return res.status(404).json({ message: "Policyholder not found." });
+        // If no policyholder is found, return 404
+        if (!policyholder) {
+            return res.status(404).json({ error: "Policyholder not found" });
+        }
+
+        // Return the policyholder details
+        res.status(200).json(policyholder);
+    } catch (error) {
+        // Handle errors
+        res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
-
-    return res.status(200).json(policyholder);
 });
 
-app.put("/policyholders/:id", (req, res) => {
-    const policyholderId = parseInt(req.params.id); // Convert ID to integer
-    const { name, email, policyNumber } = req.body;
 
-    // Find the policyholder
-    const policyholder = policyholders.find(p => p.id === policyholderId);
-    if (!policyholder) {
-        return res.status(404).json({ message: "Policyholder not found." });
+app.put('/policyholders/:id', async (req, res) => {
+    try {
+        // Find and update the policyholder by userId
+        const policyholder = await User.findOneAndUpdate(
+            { userId: req.params.id, role: "policyholder" },  // Find by userId and role
+            { $set: req.body },  // Update fields from request body
+            { new: true, runValidators: true }  // Return updated document & enforce validations
+        );
+
+        // If no policyholder is found, return 404
+        if (!policyholder) {
+            return res.status(404).json({ error: "Policyholder not found" });
+        }
+
+        // Return updated policyholder details
+        res.status(200).json(policyholder);
+    } catch (error) {
+        // Handle errors
+        res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
-
-    // Validate input
-    if (!name && !email && !policyNumber) {
-        return res.status(400).json({ message: "At least one field (name, email, or policyNumber) is required for update." });
-    }
-
-    // Check for duplicate email
-    if (email && policyholders.some(p => p.email === email && p.id !== policyholderId)) {
-        return res.status(400).json({ message: "Email already in use by another policyholder." });
-    }
-
-    // Update policyholder details
-    if (name) policyholder.name = name;
-    if (email) policyholder.email = email;
-    if (policyNumber) policyholder.policyNumber = policyNumber;
-
-    return res.status(200).json({ message: "Policyholder updated successfully!", policyholder });
 });
 
-app.delete("/policyholders/:id", (req, res) => {
-    const policyholderId = parseInt(req.params.id); // Convert ID to integer
-    
-    // Find policyholder index
-    const policyholderIndex = policyholders.findIndex(p => p.id === policyholderId);
-    
-    if (policyholderIndex === -1) {
-        return res.status(404).json({ message: "Policyholder not found." });
+
+app.delete('/policyholders/:id', async (req, res) => {
+    try {
+        // Find and delete the policyholder by userId
+        const policyholder = await User.findOneAndDelete({ userId: req.params.id, role: "policyholder" });
+
+        // If no policyholder is found, return 404
+        if (!policyholder) {
+            return res.status(404).json({ error: "Policyholder not found" });
+        }
+
+        // Return success message
+        res.status(200).json({ message: "Policyholder deleted successfully" });
+    } catch (error) {
+        // Handle errors
+        res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
-
-    // Remove policyholder from the array
-    policyholders.splice(policyholderIndex, 1);
-
-    return res.status(200).json({ message: "Policyholder deleted successfully!" });
 });
+
 
 
 app.post("/policies", (req, res) => {
