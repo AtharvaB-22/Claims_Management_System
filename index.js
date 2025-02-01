@@ -5,6 +5,8 @@ const bcrypt = require('bcryptjs'); // Import bcrypt for password hashing
 const User = require('./models/User');
 const Policy = require('./models/Policy');
 const Claim=require('./models/Claim');
+const SupportingDocument = require('./models/SupportingDocument');  // Ensure correct path
+
 
 const { 
     createUser, getUsers, getUserByID, updateUser, deleteUser, users 
@@ -487,87 +489,116 @@ app.delete("/claims/:claimId", async (req, res) => {
 });
 
 
+// Create a new Supporting Document
+app.post("/documents", async (req, res) => {
+    try {
+        const { documentId, claimId, fileName, fileType } = req.body;
 
-const documents = []; // In-memory storage for documents
+        // Check if claim exists
+        const existingClaim = await Claim.findOne({ claimId: parseInt(claimId) });
+        if (!existingClaim) {
+            return res.status(404).json({ error: "Claim not found" });
+        }
 
-app.post("/documents", (req, res) => {
-    const { id, claimId, type, filename, url } = req.body;
+        // Create new document entry
+        const newDocument = new SupportingDocument({
+            documentId: parseInt(documentId),
+            claimId: parseInt(claimId),
+            fileName,
+            fileType
+        });
 
-    // Validate required fields
-    if (!id || !claimId || !type || !filename || !url) {
-        return res.status(400).json({ message: "All fields (id, claimId, type, filename, url) are required." });
+        await newDocument.save();
+
+        res.json({ message: "Document uploaded successfully", newDocument });
+
+    } catch (error) {
+        res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
-
-    // Check if document already exists
-    if (documents.some(d => d.id === id)) {
-        return res.status(400).json({ message: "Document ID already exists." });
-    }
-
-    // Create and store the document
-    const newDocument = { id, claimId, type, filename, url };
-    documents.push(newDocument);
-
-    return res.status(201).json({ message: "Document uploaded successfully!", document: newDocument });
 });
 
-app.get("/documents", (req, res) => {
-    if (documents.length === 0) {
-        return res.status(404).json({ message: "No documents found." });
+
+app.get("/documents", async (req, res) => {
+    try {
+        const { claimId } = req.query;
+
+        let query = {};
+        if (claimId) {
+            query.claimId = parseInt(claimId);
+        }
+
+        const documents = await SupportingDocument.find(query);
+        res.json(documents);
+
+    } catch (error) {
+        res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
-    return res.status(200).json(documents);
 });
 
-app.get("/documents/:id", (req, res) => {
-    const documentId = parseInt(req.params.id); // Convert ID to integer
-    const document = documents.find(d => d.id === documentId);
+// Get Supporting Document by custom documentId
+app.get("/documents/:documentId", async (req, res) => {
+    try {
+        const documentId = parseInt(req.params.documentId); // Convert to number
+        const document = await SupportingDocument.findOne({ documentId });
 
-    if (!document) {
-        return res.status(404).json({ message: "Document not found." });
+        if (!document) {
+            return res.status(404).json({ error: "Document not found" });
+        }
+
+        res.json(document);
+    } catch (error) {
+        res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
-
-    return res.status(200).json(document);
 });
 
-app.put("/documents/:id", (req, res) => {
-    const documentId = parseInt(req.params.id); // Convert ID to integer
-    const { type, filename, url } = req.body;
 
-    // Find the document
-    const document = documents.find(d => d.id === documentId);
-    if (!document) {
-        return res.status(404).json({ message: "Document not found." });
+// Update Supporting Document by documentId
+app.put("/documents/:documentId", async (req, res) => {
+    try {
+        const { documentId } = req.params;
+        const updateData = req.body;
+
+        // Check if document exists
+        const existingDocument = await SupportingDocument.findOne({ documentId: parseInt(documentId) });
+        if (!existingDocument) {
+            return res.status(404).json({ error: "Document not found" });
+        }
+
+        // Update document details
+        const updatedDocument = await SupportingDocument.findOneAndUpdate(
+            { documentId: parseInt(documentId) },
+            updateData,
+            { new: true }
+        );
+
+        res.json({ message: "Document updated successfully", updatedDocument });
+
+    } catch (error) {
+        res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
-
-    // Validate input
-    if (!type && !filename && !url) {
-        return res.status(400).json({ message: "At least one field (type, filename, or url) is required for update." });
-    }
-
-    // Update document details
-    if (type) document.type = type;
-    if (filename) document.filename = filename;
-    if (url) document.url = url;
-
-    return res.status(200).json({ message: "Document updated successfully!", document });
 });
 
-app.delete("/documents/:id", (req, res) => {
-    const documentId = parseInt(req.params.id); // Convert ID to integer
+// Delete Supporting Document by documentId
+app.delete("/documents/:documentId", async (req, res) => {
+    try {
+        const { documentId } = req.params;
 
-    // Find document index
-    const documentIndex = documents.findIndex(d => d.id === documentId);
-    if (documentIndex === -1) {
-        return res.status(404).json({ message: "Document not found." });
+        // Check if document exists
+        const existingDocument = await SupportingDocument.findOne({ documentId: parseInt(documentId) });
+        if (!existingDocument) {
+            return res.status(404).json({ error: "Document not found" });
+        }
+
+        // Delete document
+        await SupportingDocument.findOneAndDelete({ documentId: parseInt(documentId) });
+
+        res.json({ message: "Document deleted successfully" });
+
+    } catch (error) {
+        res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
-
-    // Remove document from the array
-    const deletedDocument = documents.splice(documentIndex, 1)[0];
-
-    return res.status(200).json({ 
-        message: "Document deleted successfully!",
-        deletedDocument
-    });
 });
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
