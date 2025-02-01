@@ -1,3 +1,4 @@
+require('dotenv').config({ path: './setup.env' }); // Load setup.env
 const express = require("express");
 const connectDB = require('./config/db');
 connectDB();
