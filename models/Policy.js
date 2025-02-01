@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const PolicySchema = new mongoose.Schema({
+    policyId: { 
+        type: Number, 
+        unique: true 
+    },  // Custom policy ID
     policyNumber: {
         type: String,
         required: true,
@@ -9,7 +13,7 @@ const PolicySchema = new mongoose.Schema({
     policyType: {
         type: String,
         required: true,
-        enum: ['health', 'vehicle', 'home', 'life'] // Restrict to valid policy types
+        enum: ['health', 'vehicle', 'home', 'life','auto'] // Restrict to valid policy types
     },
     coverageAmount: {
         type: Number,
@@ -20,8 +24,7 @@ const PolicySchema = new mongoose.Schema({
         required: true
     },
     policyholderId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // References the User schema (policyholder)
+        type: Number, // References the User schema (policyholder)
         required: true
     }
 }, { timestamps: true }); // Adds createdAt & updatedAt timestamps

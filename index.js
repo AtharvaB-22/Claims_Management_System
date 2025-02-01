@@ -3,6 +3,8 @@ const connectDB = require('./config/db');
 connectDB();
 const bcrypt = require('bcryptjs'); // Import bcrypt for password hashing
 const User = require('./models/User');
+const Policy = require('./models/Policy');
+
 const { 
     createUser, getUsers, getUserByID, updateUser, deleteUser, users 
 } = require("./entities");
@@ -291,85 +293,94 @@ app.delete('/policyholders/:id', async (req, res) => {
 
 
 
-app.post("/policies", (req, res) => {
-    const { id, policyholderId, type, coverageAmount, premium } = req.body;
+app.post("/policies", async (req, res) => {
+    try {
+        const { policyId, policyNumber, policyType, coverageAmount, premium, policyholderId } = req.body;
 
-    // Validate required fields
-    if (!id || !policyholderId || !type || !coverageAmount || !premium) {
-        return res.status(400).json({ message: "All fields (id, policyholderId, type, coverageAmount, premium) are required." });
+        // Check if Users model is correctly imported
+        if (!User) {
+            return res.status(500).json({ error: "User model is not properly imported" });
+        }
+
+        // Check if the provided policyholderId exists in Users and has role 'policyholder'
+        const policyholder = await User.findOne({ userId: policyholderId, role: "policyholder" });
+        if (!policyholder) {
+            return res.status(400).json({ error: "Policyholder with this ID does not exist or is not a policyholder" });
+        }
+
+        // Create a new policy
+        const newPolicy = new Policy({
+            policyId,
+            policyNumber,
+            policyType,
+            coverageAmount,
+            premium,
+            policyholderId, // Store the custom ID, not MongoDB's ObjectId
+        });
+
+        await newPolicy.save();
+        res.status(201).json({ message: "Policy created successfully", policy: newPolicy });
+    } catch (error) {
+        res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
-
-    // Check if policy already exists
-    if (policies.some(p => p.id === id)) {
-        return res.status(400).json({ message: "Policy ID already exists." });
-    }
-
-    // Create and store the policy
-    const newPolicy = { id, policyholderId, type, coverageAmount, premium };
-    policies.push(newPolicy);
-
-    return res.status(201).json({ message: "Policy created successfully!", policy: newPolicy });
 });
 
-app.get("/policies", (req, res) => {
-    if (policies.length === 0) {
-        return res.status(404).json({ message: "No policies found." });
+
+app.get("/policies", async (req, res) => {
+    try {
+        const policies = await Policy.find();
+        res.status(200).json(policies);
+    } catch (error) {
+        res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
-    return res.status(200).json(policies);
 });
 
-app.get("/policies/:id", (req, res) => {
-    const policyId = parseInt(req.params.id); // Convert ID to integer
-    const policy = policies.find(p => p.id === policyId);
+app.get("/policies/:id", async (req, res) => {
+    try {
+        const policy = await Policy.findOne({ policyId: req.params.id });
 
-    if (!policy) {
-        return res.status(404).json({ message: "Policy not found." });
+        if (!policy) {
+            return res.status(404).json({ error: "Policy not found" });
+        }
+
+        res.status(200).json(policy);
+    } catch (error) {
+        res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
-
-    return res.status(200).json(policy);
 });
 
-app.put("/policies/:id", (req, res) => {
-    const policyId = parseInt(req.params.id); // Convert ID to integer
-    const { type, coverageAmount, premium } = req.body;
+app.put("/policies/:id", async (req, res) => {
+    try {
+        const updatedPolicy = await Policy.findOneAndUpdate(
+            { policyId: req.params.id },  // Find policy by custom policyId
+            req.body,  // Update fields based on request body
+            { new: true, runValidators: true } // Return updated document
+        );
 
-    // Find the policy
-    const policy = policies.find(p => p.id === policyId);
-    if (!policy) {
-        return res.status(404).json({ message: "Policy not found." });
+        if (!updatedPolicy) {
+            return res.status(404).json({ error: "Policy not found" });
+        }
+
+        res.status(200).json(updatedPolicy);
+    } catch (error) {
+        res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
-
-    // Validate input
-    if (!type && !coverageAmount && !premium) {
-        return res.status(400).json({ message: "At least one field (type, coverageAmount, or premium) is required for update." });
-    }
-
-    // Update policy details
-    if (type) policy.type = type;
-    if (coverageAmount) policy.coverageAmount = coverageAmount;
-    if (premium) policy.premium = premium;
-
-    return res.status(200).json({ message: "Policy updated successfully!", policy });
 });
 
-app.delete("/policies/:id", (req, res) => {
-    const policyId = parseInt(req.params.id); // Convert ID to integer
+app.delete("/policies/:id", async (req, res) => {
+    try {
+        const deletedPolicy = await Policy.findOneAndDelete({ policyId: req.params.id });
 
-    // Find the index of the policy
-    const policyIndex = policies.findIndex(p => p.id === policyId);
+        if (!deletedPolicy) {
+            return res.status(404).json({ error: "Policy not found" });
+        }
 
-    if (policyIndex === -1) {
-        return res.status(404).json({ message: "Policy not found." });
+        res.status(200).json({ message: "Policy deleted successfully", deletedPolicy });
+    } catch (error) {
+        res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
-
-    // Remove the policy from the array
-    const deletedPolicy = policies.splice(policyIndex, 1)[0];
-
-    return res.status(200).json({ 
-        message: "Policy deleted successfully!",
-        deletedPolicy
-    });
 });
+
 
 app.post("/claims", (req, res) => {
     const { id, policyId, status, amount, description } = req.body;
