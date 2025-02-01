@@ -1,4 +1,5 @@
 const express = require('express');
+const { validate, validateClaim } = require("../middleware/validation");
 const Claim = require('../models/Claim');
 const Policy = require('../models/Policy');
 const User = require('../models/User');
@@ -6,7 +7,7 @@ const User = require('../models/User');
 const router = express.Router();
 
 // Create a Claim
-router.post("/", async (req, res) => {
+router.post("/", validate(validateClaim), async (req, res) => {
     try {
         const { claimId, policyId, policyholderId, claimAmount, status } = req.body;
 

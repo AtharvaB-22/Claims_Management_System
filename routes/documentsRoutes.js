@@ -1,11 +1,12 @@
 const express = require('express');
+const { validate, validateDocument } = require("../middleware/validation");
 const SupportingDocument = require('../models/SupportingDocument');
 const Claim = require('../models/Claim');
 
 const router = express.Router();
 
 // Upload a Supporting Document
-router.post("/", async (req, res) => {
+router.post("/", validate(validateDocument), async (req, res) => {
     try {
         const { documentId, claimId, fileName, fileType } = req.body;
 

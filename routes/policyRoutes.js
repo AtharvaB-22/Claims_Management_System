@@ -1,10 +1,10 @@
 const express = require('express');
+const { validate, validatePolicy } = require("../middleware/validation");
 const Policy = require('../models/Policy');
 const User = require('../models/User'); // Policyholders are stored as users
-
 const router = express.Router();
 
-router.post("/", async (req, res) => {
+router.post("/", validate(validatePolicy), async (req, res) => {
     try {
         const { policyId, policyNumber, policyType, coverageAmount, premium, policyholderId } = req.body;
 
