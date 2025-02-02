@@ -13,7 +13,7 @@ const PolicySchema = new mongoose.Schema({
     policyType: {
         type: String,
         required: true,
-        enum: ['health', 'vehicle', 'home', 'life','auto'] // Restrict to valid policy types
+        enum: ['Health', 'Vehicle', 'Home', 'Life','Auto'] // Restrict to valid policy types
     },
     coverageAmount: {
         type: Number,
