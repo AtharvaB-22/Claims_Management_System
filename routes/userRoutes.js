@@ -2,10 +2,13 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const { validate, validateUser } = require("../middleware/validation");
 const User = require('../models/User');
+const { deleteUser } = require("../entities");
+const adminOrSelfAuth = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-router.post('/', async (req, res) => {
+// Create a new user
+router.post('/', validate(validateUser), async (req, res) => {
     try {
         const { name, email, password, role } = req.body;
 
@@ -18,7 +21,7 @@ router.post('/', async (req, res) => {
         // Find the highest userId and increment it
         const lastUser = await User.findOne().sort({ userId: -1 });
 
-        // Ensure that lastUser exists before incrementing
+        // Ensure lastUser exists before incrementing
         const newUserId = lastUser && lastUser.userId ? lastUser.userId + 1 : 1;
 
         // Check if newUserId is valid
@@ -48,6 +51,7 @@ router.post('/', async (req, res) => {
     }
 });
 
+// Get all users
 router.get('/', async (req, res) => {
     try {
         const users = await User.find();
@@ -57,7 +61,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Get User by ID
+// Get user by ID
 router.get('/:id', async (req, res) => {
     try {
         const user = await User.findOne({ userId: req.params.id });
@@ -69,7 +73,7 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// Update User
+// Update user
 router.put('/:id', async (req, res) => {
     try {
         const updatedUser = await User.findOneAndUpdate({ userId: req.params.id }, req.body, { new: true });
@@ -81,8 +85,8 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// Delete User
-router.delete('/:id', async (req, res) => {
+// Delete user (Allow self-deletion or admin-only deletion)
+router.delete('/:id', adminOrSelfAuth, async (req, res) => {
     try {
         const deletedUser = await User.findOneAndDelete({ userId: req.params.id });
         if (!deletedUser) return res.status(404).json({ error: 'User not found' });
