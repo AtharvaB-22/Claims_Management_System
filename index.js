@@ -1,7 +1,7 @@
 require('dotenv').config({ path: './setup.env' }); // Load setup.env
 const express = require("express");
 const cors = require('cors');
-
+const rateLimit = require('express-rate-limit');
 const app = express(); // Initialize app first
 app.use(express.json()); // Allows handling JSON data in requests
 
@@ -15,6 +15,14 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 }));
+
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per window
+    message: 'Too many requests, please try again later.'
+});
+
+app.use(apiLimiter);
 
 const connectDB = require('./config/db');
 connectDB();
