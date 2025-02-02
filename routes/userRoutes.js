@@ -4,9 +4,37 @@ const { validate, validateUser } = require("../middleware/validation");
 const User = require('../models/User');
 const { deleteUser } = require("../entities");
 const adminOrSelfAuth = require("../middleware/authMiddleware");
+const jwt = require('jsonwebtoken');
+const authenticateJWT = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
+router.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(401).json({ error: "Invalid email or password" });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ error: "Invalid email or password" });
+        }
+
+        // Generate JWT Token
+        const token = jwt.sign(
+            { userId: user._id, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: "1h" } // Token valid for 1 hour
+        );
+
+        res.status(200).json({ message: "Login successful", token });
+    } catch (error) {
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
 // Create a new user
 router.post('/', validate(validateUser), async (req, res) => {
     try {
@@ -52,7 +80,7 @@ router.post('/', validate(validateUser), async (req, res) => {
 });
 
 // Get all users
-router.get('/', async (req, res) => {
+router.get('/', authenticateJWT, async (req, res) => {
     try {
         const users = await User.find();
         res.status(200).json(users);
@@ -62,7 +90,7 @@ router.get('/', async (req, res) => {
 });
 
 // Get user by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', authenticateJWT, async (req, res) => {
     try {
         const user = await User.findOne({ userId: req.params.id });
         if (!user) return res.status(404).json({ error: 'User not found' });
@@ -74,7 +102,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Update user
-router.put('/:id', async (req, res) => {
+router.put('/:id', authenticateJWT, async (req, res) => {
     try {
         const updatedUser = await User.findOneAndUpdate({ userId: req.params.id }, req.body, { new: true });
         if (!updatedUser) return res.status(404).json({ error: 'User not found' });
@@ -86,7 +114,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete user (Allow self-deletion or admin-only deletion)
-router.delete('/:id', adminOrSelfAuth, async (req, res) => {
+router.delete('/:id', authenticateJWT, adminOrSelfAuth, async (req, res) => {
     try {
         const deletedUser = await User.findOneAndDelete({ userId: req.params.id });
         if (!deletedUser) return res.status(404).json({ error: 'User not found' });
