@@ -6,8 +6,10 @@ const { deleteUser } = require("../entities");
 const adminOrSelfAuth = require("../middleware/authMiddleware");
 const jwt = require('jsonwebtoken');
 const authenticateJWT = require("../middleware/authMiddleware");
+const cookieParser = require('cookie-parser');
 
 const router = express.Router();
+app.use(cookieParser());
 
 router.post('/login', async (req, res) => {
     try {
@@ -27,13 +29,26 @@ router.post('/login', async (req, res) => {
         const token = jwt.sign(
             { userId: user._id, role: user.role },
             process.env.JWT_SECRET,
-            { expiresIn: "1h" } // Token valid for 1 hour
+            { expiresIn: "1h" }
         );
 
-        res.status(200).json({ message: "Login successful", token });
+        // Store token in HTTP-Only Cookie
+        res.cookie("jwt", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "Strict",
+            maxAge: 60 * 60 * 1000 // 1 hour
+        });
+
+        res.status(200).json({ message: "Login successful" });
     } catch (error) {
         res.status(500).json({ error: "Internal Server Error" });
     }
+});
+
+router.post('/logout', (req, res) => {
+    res.clearCookie("jwt"); // Remove the JWT cookie
+    res.status(200).json({ message: "Logged out successfully" });
 });
 // Create a new user
 router.post('/', validate(validateUser), async (req, res) => {

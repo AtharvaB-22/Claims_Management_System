@@ -21,15 +21,15 @@ const adminOrSelfAuth = async (req, res, next) => {
 };
 
 const authenticateJWT = (req, res, next) => {
-    const token = req.header("Authorization");
+    const token = req.cookies.jwt; // Read JWT from cookies
 
     if (!token) {
         return res.status(401).json({ error: "Access Denied: No token provided" });
     }
 
     try {
-        const decoded = jwt.verify(token.replace("Bearer ", ""), process.env.JWT_SECRET);
-        req.user = decoded; // Attach decoded user details to request
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;
         next();
     } catch (error) {
         res.status(403).json({ error: "Invalid token" });
@@ -37,5 +37,4 @@ const authenticateJWT = (req, res, next) => {
 };
 
 module.exports = authenticateJWT;
-
 module.exports = adminOrSelfAuth;
