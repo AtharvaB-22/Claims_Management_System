@@ -9,38 +9,29 @@ const authenticateJWT = require("../middleware/authMiddleware");
 const cookieParser = require('cookie-parser');
 
 const router = express.Router();
-app.use(cookieParser());
+router.use(cookieParser());
 
-router.post('/login', async (req, res) => {
+router.post("/login", async (req, res) => {
     try {
         const { email, password } = req.body;
-        
         const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(401).json({ error: "Invalid email or password" });
-        }
+
+        if (!user) return res.status(401).json({ error: "Invalid email or password" });
 
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(401).json({ error: "Invalid email or password" });
-        }
+        if (!isMatch) return res.status(401).json({ error: "Invalid email or password" });
 
-        // Generate JWT Token
-        const token = jwt.sign(
-            { userId: user._id, role: user.role },
-            process.env.JWT_SECRET,
-            { expiresIn: "1h" }
-        );
+        // **Generate JWT**
+        const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-        // Store token in HTTP-Only Cookie
-        res.cookie("jwt", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "Strict",
-            maxAge: 60 * 60 * 1000 // 1 hour
+        // **Set JWT in HTTP-Only Cookie**
+        res.cookie("authToken", token, { 
+            httpOnly: true, 
+            secure: process.env.NODE_ENV === "production", 
+            sameSite: "Strict"
         });
 
-        res.status(200).json({ message: "Login successful" });
+        res.json({ message: "Login successful" });
     } catch (error) {
         res.status(500).json({ error: "Internal Server Error" });
     }
