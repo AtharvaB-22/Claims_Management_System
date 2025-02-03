@@ -3,11 +3,10 @@ const { validate, validateClaim } = require("../middleware/validation");
 const Claim = require('../models/Claim');
 const Policy = require('../models/Policy');
 const User = require('../models/User');
-const authenticateJWT = require("../middleware/authMiddleware");
 const router = express.Router();
 
 // Create a Claim
-router.post("/", authenticateJWT, validate(validateClaim), async (req, res) => {
+router.post("/", validate(validateClaim), async (req, res) => {
     try {
         const { claimId, policyId, policyholderId, claimAmount, status } = req.body;
 
@@ -51,7 +50,7 @@ router.post("/", authenticateJWT, validate(validateClaim), async (req, res) => {
 });
 
 // Get All Claims
-router.get("/", authenticateJWT, async (req, res) => {
+router.get("/", async (req, res) => {
     try {
         const claims = await Claim.find();
         res.status(200).json(claims);
@@ -61,7 +60,7 @@ router.get("/", authenticateJWT, async (req, res) => {
 });
 
 // Get Claim by ID
-router.get("/:id", authenticateJWT, async (req, res) => {
+router.get("/:id", async (req, res) => {
     try {
         const claim = await Claim.findOne({ claimId: req.params.id });
         if (!claim) {
@@ -74,7 +73,7 @@ router.get("/:id", authenticateJWT, async (req, res) => {
 });
 
 // Update Claim
-router.put("/:id", authenticateJWT, async (req, res) => {
+router.put("/:id", async (req, res) => {
     try {
         const updatedClaim = await Claim.findOneAndUpdate(
             { claimId: req.params.id },
@@ -91,7 +90,7 @@ router.put("/:id", authenticateJWT, async (req, res) => {
 });
 
 // Delete Claim
-router.delete("/:id", authenticateJWT, async (req, res) => {
+router.delete("/:id", async (req, res) => {
     try {
         const deletedClaim = await Claim.findOneAndDelete({ claimId: req.params.id });
         if (!deletedClaim) {

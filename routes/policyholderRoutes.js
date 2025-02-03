@@ -1,10 +1,8 @@
 const express = require('express');
 const User = require('../models/User');  // User model is used to fetch policyholders
-const authenticateJWT = require("../middleware/authMiddleware");
-
 const router = express.Router();
 
-router.post("/", authenticateJWT, async (req, res) => {
+router.post("/", async (req, res) => {
     try {
         const { id, name, email, policyNumber } = req.body;
         if (!id || !name || !email || !policyNumber) {
@@ -19,7 +17,7 @@ router.post("/", authenticateJWT, async (req, res) => {
 });
 
 // Get All Policyholders
-router.get("/", authenticateJWT, async (req, res) => {
+router.get("/", async (req, res) => {
     try {
         const policyholders = await User.find({ role: "policyholder" }).select("-password");
         res.status(200).json(policyholders);
@@ -29,7 +27,7 @@ router.get("/", authenticateJWT, async (req, res) => {
 });
 
 // Get Policyholder by ID
-router.get("/:id", authenticateJWT, async (req, res) => {
+router.get("/:id", async (req, res) => {
     try {
         const policyholder = await User.findOne({ userId: req.params.id, role: "policyholder" }).select("-password");
         if (!policyholder) {
@@ -42,7 +40,7 @@ router.get("/:id", authenticateJWT, async (req, res) => {
 });
 
 // Update Policyholder
-router.put("/:id", authenticateJWT, async (req, res) => {
+router.put("/:id", async (req, res) => {
     try {
         const policyholder = await User.findOneAndUpdate(
             { userId: req.params.id, role: "policyholder" },
@@ -59,7 +57,7 @@ router.put("/:id", authenticateJWT, async (req, res) => {
 });
 
 // Delete Policyholder
-router.delete("/:id", authenticateJWT, async (req, res) => {
+router.delete("/:id", async (req, res) => {
     try {
         const policyholder = await User.findOneAndDelete({ userId: req.params.id, role: "policyholder" });
         if (!policyholder) {

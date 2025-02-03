@@ -2,11 +2,10 @@ const express = require('express');
 const { validate, validateDocument } = require("../middleware/validation");
 const SupportingDocument = require('../models/SupportingDocument');
 const Claim = require('../models/Claim');
-const authenticateJWT = require("../middleware/authMiddleware");
 const router = express.Router();
 
 // Upload a Supporting Document
-router.post("/", authenticateJWT, validate(validateDocument), async (req, res) => {
+router.post("/", validate(validateDocument), async (req, res) => {
     try {
         const { documentId, claimId, fileName, fileType } = req.body;
 
@@ -38,7 +37,7 @@ router.post("/", authenticateJWT, validate(validateDocument), async (req, res) =
 });
 
 // Get All Supporting Documents
-router.get("/", authenticateJWT, async (req, res) => {
+router.get("/", async (req, res) => {
     try {
         const documents = await SupportingDocument.find();
         res.status(200).json(documents);
@@ -48,7 +47,7 @@ router.get("/", authenticateJWT, async (req, res) => {
 });
 
 // Get Document by ID
-router.get("/:id", authenticateJWT, async (req, res) => {
+router.get("/:id", async (req, res) => {
     try {
         const document = await SupportingDocument.findOne({ documentId: req.params.id });
         if (!document) {
@@ -61,7 +60,7 @@ router.get("/:id", authenticateJWT, async (req, res) => {
 });
 
 // Update Document by ID
-router.put("/:id", authenticateJWT, async (req, res) => {
+router.put("/:id", async (req, res) => {
     try {
         const updatedDocument = await SupportingDocument.findOneAndUpdate(
             { documentId: req.params.id },
@@ -79,7 +78,7 @@ router.put("/:id", authenticateJWT, async (req, res) => {
 
 
 // Delete Document
-router.delete("/:id", authenticateJWT, async (req, res) => {
+router.delete("/:id", async (req, res) => {
     try {
         const deletedDocument = await SupportingDocument.findOneAndDelete({ documentId: req.params.id });
         if (!deletedDocument) {

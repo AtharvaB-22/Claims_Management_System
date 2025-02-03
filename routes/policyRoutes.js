@@ -2,10 +2,9 @@ const express = require('express');
 const { validate, validatePolicy } = require("../middleware/validation");
 const Policy = require('../models/Policy');
 const User = require('../models/User'); // Policyholders are stored as users
-const authenticateJWT = require("../middleware/authMiddleware");
 const router = express.Router();
 
-router.post("/", authenticateJWT, validate(validatePolicy), async (req, res) => {
+router.post("/", validate(validatePolicy), async (req, res) => {
     try {
         const { policyId, policyNumber, policyType, coverageAmount, premium, policyholderId } = req.body;
 
@@ -40,7 +39,7 @@ router.post("/", authenticateJWT, validate(validatePolicy), async (req, res) => 
 
 
 // Get All Policies
-router.get("/", authenticateJWT, async (req, res) => {
+router.get("/",  async (req, res) => {
     try {
         const policies = await Policy.find();
         res.status(200).json(policies);
@@ -50,7 +49,7 @@ router.get("/", authenticateJWT, async (req, res) => {
 });
 
 // Get Policy by ID
-router.get("/:id", authenticateJWT, async (req, res) => {
+router.get("/:id", async (req, res) => {
     try {
         const policy = await Policy.findOne({ policyId: req.params.id });
         if (!policy) {
@@ -63,7 +62,7 @@ router.get("/:id", authenticateJWT, async (req, res) => {
 });
 
 // Update Policy
-router.put("/:id", authenticateJWT, async (req, res) => {
+router.put("/:id", async (req, res) => {
     try {
         const updatedPolicy = await Policy.findOneAndUpdate(
             { policyId: req.params.id },
@@ -80,7 +79,7 @@ router.put("/:id", authenticateJWT, async (req, res) => {
 });
 
 // Delete Policy
-router.delete("/:id", authenticateJWT, async (req, res) => {
+router.delete("/:id", async (req, res) => {
     try {
         const deletedPolicy = await Policy.findOneAndDelete({ policyId: req.params.id });
         if (!deletedPolicy) {

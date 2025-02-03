@@ -5,7 +5,6 @@ const User = require('../models/User');
 const { deleteUser } = require("../entities");
 const adminOrSelfAuth = require("../middleware/authMiddleware");
 const jwt = require('jsonwebtoken');
-const authenticateJWT = require("../middleware/authMiddleware");
 const cookieParser = require('cookie-parser');
 
 const router = express.Router();
@@ -67,7 +66,7 @@ router.get("/", async (req, res) => {
 
 
 // Get user by ID
-router.get('/:id', authenticateJWT, async (req, res) => {
+router.get('/:id', async (req, res) => {
     try {
         const user = await User.findOne({ userId: req.params.id });
         if (!user) return res.status(404).json({ error: 'User not found' });
@@ -79,7 +78,7 @@ router.get('/:id', authenticateJWT, async (req, res) => {
 });
 
 // Update user
-router.put('/:id', authenticateJWT, async (req, res) => {
+router.put('/:id', async (req, res) => {
     try {
         const updatedUser = await User.findOneAndUpdate({ userId: req.params.id }, req.body, { new: true });
         if (!updatedUser) return res.status(404).json({ error: 'User not found' });
@@ -91,7 +90,7 @@ router.put('/:id', authenticateJWT, async (req, res) => {
 });
 
 // Delete user (Allow self-deletion or admin-only deletion)
-router.delete('/:id', authenticateJWT, adminOrSelfAuth, async (req, res) => {
+router.delete('/:id', adminOrSelfAuth, async (req, res) => {
     try {
         const deletedUser = await User.findOneAndDelete({ userId: req.params.id });
         if (!deletedUser) return res.status(404).json({ error: 'User not found' });
