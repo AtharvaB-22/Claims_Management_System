@@ -7,7 +7,7 @@ const payload = {
     role: "policyholder"
 };
 
-const secretKey = "MONGO_URI"; // Use the same secret from your setup.env
+const secretKey = "MONGO_URI"; 
 const token = jwt.sign(payload, secretKey, { expiresIn: "1h" });
 
 console.log("Generated Token:", token);

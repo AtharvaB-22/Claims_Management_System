@@ -72,6 +72,8 @@ const { deleteUser } = require("../entities");
 const adminOrSelfAuth = require("../middleware/authMiddleware");
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
+const { loginUser, registerUser } = require("../controllers/userController");
+
 
 const router = express.Router();
 router.use(cookieParser());
@@ -166,5 +168,8 @@ router.delete('/:id', adminOrSelfAuth, async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+router.post("/register", registerUser);
+router.post("/login", loginUser);
 
 module.exports = router;
