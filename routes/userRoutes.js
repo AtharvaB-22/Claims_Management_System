@@ -11,36 +11,6 @@ const cookieParser = require('cookie-parser');
 const router = express.Router();
 router.use(cookieParser());
 
-router.post("/login", async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const user = await User.findOne({ email });
-
-        if (!user) return res.status(401).json({ error: "Invalid email or password" });
-
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(401).json({ error: "Invalid email or password" });
-
-        // **Generate JWT**
-        const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
-
-        // **Set JWT in HTTP-Only Cookie**
-        res.cookie("authToken", token, { 
-            httpOnly: true, 
-            secure: process.env.NODE_ENV === "production", 
-            sameSite: "Strict"
-        });
-
-        res.json({ message: "Login successful" });
-    } catch (error) {
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-});
-
-router.post('/logout', (req, res) => {
-    res.clearCookie("jwt"); // Remove the JWT cookie
-    res.status(200).json({ message: "Logged out successfully" });
-});
 // Create a new user
 router.post('/', validate(validateUser), async (req, res) => {
     try {
@@ -86,14 +56,15 @@ router.post('/', validate(validateUser), async (req, res) => {
 });
 
 // Get all users
-router.get('/', authenticateJWT, async (req, res) => {
+router.get("/", async (req, res) => {
     try {
-        const users = await User.find();
-        res.status(200).json(users);
+        const users = await User.find();  // Fetch all users from MongoDB
+        res.status(200).json({ users });
     } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
 });
+
 
 // Get user by ID
 router.get('/:id', authenticateJWT, async (req, res) => {
