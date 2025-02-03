@@ -1,3 +1,71 @@
+/**
+ * @swagger
+ * tags:
+ *   name: Policies
+ *   description: Policy management endpoints
+ */
+
+/**
+ * @swagger
+ * /policies:
+ *   get:
+ *     summary: Get all policies
+ *     tags: [Policies]
+ *     responses:
+ *       200:
+ *         description: Successfully fetched all policies
+ */
+
+/**
+ * @swagger
+ * /policies/{id}:
+ *   get:
+ *     summary: Get a policy by ID
+ *     tags: [Policies]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Policy ID
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successfully fetched policy data
+ *       404:
+ *         description: Policy not found
+ */
+
+/**
+ * @swagger
+ * /policies:
+ *   post:
+ *     summary: Create a new policy
+ *     tags: [Policies]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               policyNumber:
+ *                 type: string
+ *               policyType:
+ *                 type: string
+ *               coverageAmount:
+ *                 type: number
+ *               premium:
+ *                 type: number
+ *               policyholderId:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Policy created successfully
+ *       400:
+ *         description: Validation error
+ */
+
 const express = require('express');
 const { validate, validatePolicy } = require("../middleware/validation");
 const Policy = require('../models/Policy');

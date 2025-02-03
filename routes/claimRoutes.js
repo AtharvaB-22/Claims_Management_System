@@ -1,3 +1,69 @@
+/**
+ * @swagger
+ * tags:
+ *   name: Claims
+ *   description: Claim management endpoints
+ */
+
+/**
+ * @swagger
+ * /claims:
+ *   get:
+ *     summary: Get all claims
+ *     tags: [Claims]
+ *     responses:
+ *       200:
+ *         description: Successfully fetched all claims
+ */
+
+/**
+ * @swagger
+ * /claims/{id}:
+ *   get:
+ *     summary: Get a claim by ID
+ *     tags: [Claims]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Claim ID
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successfully fetched claim data
+ *       404:
+ *         description: Claim not found
+ */
+
+/**
+ * @swagger
+ * /claims:
+ *   post:
+ *     summary: Create a new claim
+ *     tags: [Claims]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               policyId:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               amount:
+ *                 type: number
+ *               status:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Claim created successfully
+ *       400:
+ *         description: Validation error
+ */
+
 const express = require('express');
 const { validate, validateClaim } = require("../middleware/validation");
 const Claim = require('../models/Claim');

@@ -1,3 +1,67 @@
+/**
+ * @swagger
+ * tags:
+ *   name: Documents
+ *   description: Document management endpoints
+ */
+
+/**
+ * @swagger
+ * /documents:
+ *   get:
+ *     summary: Get all documents
+ *     tags: [Documents]
+ *     responses:
+ *       200:
+ *         description: Successfully fetched all documents
+ */
+
+/**
+ * @swagger
+ * /documents/{id}:
+ *   get:
+ *     summary: Get a document by ID
+ *     tags: [Documents]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Document ID
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successfully fetched document data
+ *       404:
+ *         description: Document not found
+ */
+
+/**
+ * @swagger
+ * /documents:
+ *   post:
+ *     summary: Upload a new document
+ *     tags: [Documents]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               filename:
+ *                 type: string
+ *               type:
+ *                 type: string
+ *               url:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Document uploaded successfully
+ *       400:
+ *         description: Validation error
+ */
+
 const express = require('express');
 const { validate, validateDocument } = require("../middleware/validation");
 const SupportingDocument = require('../models/SupportingDocument');

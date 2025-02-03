@@ -2,8 +2,39 @@ require('dotenv').config({ path: './setup.env' }); // Load setup.env
 const express = require("express");
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
+const swaggerJsdoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
+
 const app = express(); // Initialize app first
 app.use(express.json()); // Allows handling JSON data in requests
+
+// Swagger Configuration
+const swaggerOptions = {
+    definition: {
+        openapi: "3.0.0",
+        info: {
+            title: "Claims Management API",
+            version: "1.0.0",
+            description: "API documentation for Claims Management System",
+        },
+        servers: [
+            {
+                url: "https://claims-management-system-gpit.onrender.com",
+                description: "Production Server",
+            },
+            {
+                url: "http://localhost:3000",
+                description: "Local Development Server",
+            }
+        ],
+    },
+    apis: ["./routes/*.js"], // Scans all route files for Swagger comments
+};
+
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+console.log("Swagger documentation available at /api-docs");
 
 const allowedOrigins = [
     'https://your-frontend-domain.com',
