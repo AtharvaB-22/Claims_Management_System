@@ -10,8 +10,23 @@ const AppRouter = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<AuthPage />} />
-        <Route path="/dashboard" element={role === "policyholder" ? <Dashboard /> : <Navigate to="/" />} />
+        {/* <Route path="/" element={<AuthPage />} /> */}
+        {/* <Route path="/dashboard" element={role === "policyholder" ? <Dashboard /> : <Navigate to="/" />} /> */}
+
+      {/* <Route path="/" element={<Dashboard />} />
+      <Route path="/auth" element={<AuthPage />} /> */}
+
+      {/* <Route path="/" element={<ClaimDetails />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/auth" element={<AuthPage />} />  */}
+
+      <Route path="/" element={<AdminPage />} />
+
+      {/* Keep other pages accessible */}
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/auth" element={<AuthPage />} />
+      <Route path="/claims" element={<ClaimDetails />} />
+
         <Route path="/admin" element={role === "admin" ? <AdminPage /> : <Navigate to="/" />} />
         <Route path="/claims" element={<ClaimDetails />} />
       </Routes>
