@@ -1,69 +1,3 @@
-/**
- * @swagger
- * tags:
- *   name: Users
- *   description: User management endpoints
- */
-
-/**
- * @swagger
- * /users:
- *   get:
- *     summary: Get all users
- *     tags: [Users]
- *     responses:
- *       200:
- *         description: Successfully fetched all users
- */
-
-/**
- * @swagger
- * /users/{id}:
- *   get:
- *     summary: Get a user by ID
- *     tags: [Users]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: User ID
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Successfully fetched user data
- *       404:
- *         description: User not found
- */
-
-/**
- * @swagger
- * /users:
- *   post:
- *     summary: Create a new user
- *     tags: [Users]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               email:
- *                 type: string
- *               password:
- *                 type: string
- *               role:
- *                 type: string
- *     responses:
- *       201:
- *         description: User created successfully
- *       400:
- *         description: Validation error
- */
-
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const { validate, validateUser } = require("../middleware/validation");
@@ -72,57 +6,58 @@ const { deleteUser } = require("../entities");
 const adminOrSelfAuth = require("../middleware/authMiddleware");
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
-const { loginUser, registerUser } = require("../controllers/userController");
-
 
 const router = express.Router();
 router.use(cookieParser());
 
-// Create a new user
-router.post('/', validate(validateUser), async (req, res) => {
+// 🔹 Move Login and Register routes to the top to prevent conflicts
+
+
+router.post('/', async (req, res) => {
     try {
         const { name, email, password, role } = req.body;
 
-        // Check if email already exists
+        // Check if email is already in use
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ error: 'Email is already in use' });
         }
 
-        // Find the highest userId and increment it
+        // Generate a custom user ID
         const lastUser = await User.findOne().sort({ userId: -1 });
-
-        // Ensure lastUser exists before incrementing
         const newUserId = lastUser && lastUser.userId ? lastUser.userId + 1 : 1;
-
-        // Check if newUserId is valid
-        if (isNaN(newUserId)) {
-            return res.status(500).json({ error: "Failed to generate userId" });
-        }
 
         // Hash password before saving
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // Create the new user with the generated userId
+        // Create new user
         const newUser = new User({
             userId: newUserId,
             name,
             email,
             password: hashedPassword,
-            role
+            role: role || "policyholder"
         });
 
         await newUser.save();
-        res.status(201).json({ message: 'User registered successfully', user: newUser });
+
+        // Generate JWT token
+        const token = jwt.sign(
+            { userId: newUser.userId, role: newUser.role },
+            process.env.JWT_SECRET,
+            { expiresIn: "1h" }
+        );
+
+        res.status(201).json({ message: "User registered successfully", userId: newUser.userId, token });
 
     } catch (error) {
-        console.error("Error in User Registration:", error);
+        console.error("Error in Registration:", error);
         res.status(500).json({ error: 'Internal Server Error', details: error.message });
     }
 });
 
-// Get all users
+// Keep all other routes below
 router.get("/", async (req, res) => {
     try {
         const users = await User.find();  // Fetch all users from MongoDB
@@ -132,20 +67,43 @@ router.get("/", async (req, res) => {
     }
 });
 
-
-// Get user by ID
-router.get('/:id', async (req, res) => {
+router.get('/:email', async (req, res) => {
     try {
-        const user = await User.findOne({ userId: req.params.id });
-        if (!user) return res.status(404).json({ error: 'User not found' });
+        const { email } = req.params;
+        const { password } = req.query; // Password must be sent as a query parameter
 
-        res.status(200).json(user);
+        // Find user by email
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Validate password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+
+        // Generate JWT token
+        const token = jwt.sign(
+            { userId: user.userId, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: "1h" }
+        );
+
+        res.status(200).json({
+            message: "Login successful",
+            token,
+            user: { id: user.userId, name: user.name, email: user.email, role: user.role }
+        });
+
     } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error("Error in Login:", error);
+        res.status(500).json({ error: 'Internal Server Error', details: error.message });
     }
 });
 
-// Update user
+
 router.put('/:id', async (req, res) => {
     try {
         const updatedUser = await User.findOneAndUpdate({ userId: req.params.id }, req.body, { new: true });
@@ -157,7 +115,6 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// Delete user (Allow self-deletion or admin-only deletion)
 router.delete('/:id', adminOrSelfAuth, async (req, res) => {
     try {
         const deletedUser = await User.findOneAndDelete({ userId: req.params.id });
@@ -168,8 +125,5 @@ router.delete('/:id', adminOrSelfAuth, async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
-router.post("/register", registerUser);
-router.post("/login", loginUser);
 
 module.exports = router;
