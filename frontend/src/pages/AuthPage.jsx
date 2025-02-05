@@ -84,8 +84,9 @@ export default function AuthPage() {
             localStorage.setItem("userEmail", formData.email);
             localStorage.setItem("name", data.user.name);
             localStorage.setItem("email", data.user.email);
-            // localStorage.setItem("role", user.role);
-            // console.log("User Data Stored:", data.user);
+            localStorage.setItem("userId", data.user.id); // Ensure it's stored correctly
+            
+            console.log("User Data Stored:", data.user);
 
             // ✅ Redirect based on role
             if (data.user.role === "admin") {

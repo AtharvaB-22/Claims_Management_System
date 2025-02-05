@@ -13,15 +13,22 @@ export default function Dashboard() {
     const storedName = localStorage.getItem("name");
     const storedEmail = localStorage.getItem("email");
     const storedRole = localStorage.getItem("role");
+    const storedUserId = localStorage.getItem("userId"); // ✅ Fetch user ID
+    console.log("Stored User ID:", storedUserId);
+    
 
-    setUser({ name: storedName || "Guest", email: storedEmail || "No Email" });
-    setRole(storedRole || "policyholder"); 
 
-    fetch(`${API_BASE_URL}/policies?email=${storedEmail}`)
+    setUser({ name: storedName || "Guest", email: storedEmail || "No Email", id: storedUserId });
+    setRole(storedRole || "policyholder");
+
+    fetch(`${API_BASE_URL}/policies/${storedUserId}`)
       .then((res) => res.json())
       .then((data) => setPolicies(data))
       .catch((err) => console.error("Error fetching policies:", err));
+
+      console.log("API Call:", `${API_BASE_URL}/policies/${storedUserId}`);
   }, []);
+  
   
   const handleLogout = () => {
     localStorage.removeItem("role");
@@ -54,26 +61,44 @@ export default function Dashboard() {
         {role === "policyholder" ? (
           <>
             {/* Policyholder's View */}
-            <div className="mt-6">
+            {/* <div className="mt-6">
               <h3 className="text-lg font-bold text-gray-800 mb-2">Your Policies:</h3>
               <div className="grid grid-cols-2 gap-4">
               {policies.map((policy, index) => (
               <div key={policy.id || index} className="bg-gray-200 p-4 rounded-lg">
-                {/* {policies.map((policy) => (
-                  <div key={policy.id}  */}
                     <p className="text-lg font-semibold">{policy.type} Insurance</p>
                     <p className="text-gray-700">Coverage: {policy.coverage}</p>
                   </div>
                 ))}
               </div>
+            </div> */}
+          <div className="mt-4">
+          <h3 className="font-bold mb-2">Your Policies:</h3>
+          
+          {policies.length > 0 ? (
+            <div className="grid grid-cols-2 gap-4">
+              {policies.map((policy,index) => (
+                <div key={policy.id ||index} className="bg-gray-200 p-4 rounded-lg">
+                  <div className="policy-card">
+                    <h3>{policy.policyType} Insurance</h3> {/* ✅ Shows the Policy Name */}
+                    <p>Coverage: ${policy.coverageAmount.toLocaleString()}</p> {/* ✅ Adds Comma Formatting */}
+                </div>
+                </div>
+              ))}
             </div>
+          ) : (
+            <p className="text-gray-600">No policies bought.</p>
+          )}
+        </div>
+
+            
 
             {/* Action Buttons */}
             <div className="flex flex-col items-center mt-6 space-y-4">
               {/* File a Claim Button */}
               <button
                 className="bg-[#0568a6] text-white px-6 py-3 rounded-md hover:bg-[#248e38] transition text-lg font-semibold w-2/3"
-                onClick={() => alert("Redirect to claim form")}
+                onClick={() => navigate("/claim")}
               >
                 File a New Claim
               </button>

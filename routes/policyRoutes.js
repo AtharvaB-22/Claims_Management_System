@@ -119,15 +119,16 @@ router.get("/",  async (req, res) => {
 // Get Policy by ID
 router.get("/:id", async (req, res) => {
     try {
-        const policy = await Policy.findOne({ policyId: req.params.id });
-        if (!policy) {
-            return res.status(404).json({ error: "Policy not found" });
+        const policies = await Policy.find({ policyholderId: req.params.id }); // ✅ Corrected Query
+        if (!policies || policies.length === 0) {
+            return res.status(404).json({ message: "No policies found for this policyholder" });
         }
-        res.status(200).json(policy);
+        res.json(policies); // ✅ Return all policies linked to the policyholder
     } catch (error) {
-        res.status(500).json({ error: "Internal Server Error", details: error.message });
+        res.status(500).json({ message: "Server Error", error: error.message });
     }
 });
+
 
 // Update Policy
 router.put("/:id", async (req, res) => {

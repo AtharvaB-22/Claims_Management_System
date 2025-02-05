@@ -6,10 +6,10 @@ export default function BuyPolicy() {
 
   // Predefined Policies
   const policies = [
-    { name: "Health Insurance", coverage: "Rs 50000000", price: "Rs 3500/month" },
-    { name: "Vehicle Insurance", coverage: "Rs 335000", price: "Rs 200/month" },
-    { name: "Home Insurance", coverage: "Rs 11000000", price: "Rs 400/month" },
-    { name: "Life Insurance", coverage: "Rs 5000000", price: "Rs 350/month" }
+    { name: "Health Insurance", coverage: "Rs 50000000", premium: "Rs 3500/month" },
+    { name: "Vehicle Insurance", coverage: "Rs 335000", premium: "Rs 200/month" },
+    { name: "Home Insurance", coverage: "Rs 11000000", premium: "Rs 4000/month" },
+    { name: "Life Insurance", coverage: "Rs 5000000", premium: "Rs 350/month" }
   ];
 
   const handleBuyPolicy = () => {
