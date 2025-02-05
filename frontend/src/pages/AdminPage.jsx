@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function AdminPage() {
   const [claims, setClaims] = useState([]);
@@ -6,6 +7,7 @@ export default function AdminPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedPolicy, setSelectedPolicy] = useState("");
+  const navigate = useNavigate();
 
   // Predefined Policies
   const policies = [
@@ -28,6 +30,12 @@ export default function AdminPage() {
       { id: 2, userId: 2, policyType: "Life Insurance", amount: "$500", status: "pending" }
     ]);
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("role");
+    localStorage.removeItem("email");
+    navigate("/");
+  };
 
   const handleApprove = (id) => {
     setClaims((prevClaims) =>
@@ -71,6 +79,12 @@ export default function AdminPage() {
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-4xl">
         <h2 className="text-2xl font-bold text-center text-[#0568a6] mb-4">
           Admin Dashboard
+          <button
+            className="bg-red-500 text-white px-4 py-2 rounded"
+            onClick={handleLogout}
+          >
+            Logout
+          </button>
         </h2>
 
         {/* User Management Section */}

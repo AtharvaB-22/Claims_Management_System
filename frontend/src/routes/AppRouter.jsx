@@ -10,9 +10,9 @@ const AppRoutes = () => {
     <Router>
       <Routes>
         {/* ✅ ClaimDetails is the default page for testing */}
-        <Route path="/" element={<ClaimDetails />} />
-        <Route path="/auth" element={<AuthPage />} />
+        <Route path="/" element={<AuthPage />} />
         <Route path="/admin" element={<AdminPage />} />
+        <Route path="/claim" element={<ClaimDetails />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/buy-policy" element={<BuyPolicy />} />
       </Routes>

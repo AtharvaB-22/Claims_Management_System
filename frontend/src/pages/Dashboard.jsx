@@ -17,12 +17,23 @@ export default function Dashboard() {
       { id: 2, type: "Vehicle", coverage: "$10,000" }
     ]);
   }, []);
+  const handleLogout = () => {
+    localStorage.removeItem("role");
+    localStorage.removeItem("email");
+    navigate("/");
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center">
       <div className="w-full max-w-4xl bg-white p-8 rounded-lg shadow-md mt-10">
         <h2 className="text-3xl font-bold text-center text-[#0568a6] mb-6">
-          {role === "admin" ? "Admin Dashboard" : "Policyholder Dashboard"}
+          {role === "policyholder" ? "Policyholder Dashboard" : "Admin Dashboard"}
+          <button
+            className="bg-red-500 text-white px-4 py-2 rounded"
+            onClick={handleLogout}
+          >
+            Logout
+          </button>
         </h2>
 
         {/* User Info */}

@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import API_BASE_URL from "../config";
 
 export default function AuthPage() {
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
@@ -9,53 +11,97 @@ export default function AuthPage() {
     password: "",
   });
 
+  useEffect(() => {
+    // ✅ Redirect if user is already logged in
+    const storedRole = localStorage.getItem("role");
+    if (storedRole === "admin") navigate("/admin");
+    else if (storedRole === "policyholder") navigate("/dashboard");
+  }, [navigate]);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+    
+  //   const url = isLogin
+  //     ? `${API_BASE_URL}/users/${formData.email}?password=${formData.password}` // Corrected Login API
+  //     : `${API_BASE_URL}/users`;  // Corrected Register API
+
+  //   try {
+  //     const response = await fetch(url, {
+  //       method: isLogin ? "GET" : "POST",  // GET for login, POST for register
+  //       headers: { "Content-Type": "application/json" },
+  //       body: isLogin ? null : JSON.stringify(formData),  // No body for GET request
+  //     });
+
+  //     const data = await response.json();
+  //     console.log("API Response:", data); // Debugging
+
+  //     if (response.ok) {
+  //       // ✅ Store user details
+  //       localStorage.setItem("role", data.role);
+  //       localStorage.setItem("userEmail", formData.email);
+
+  //       alert("Login Successful!");
+
+  //       // ✅ Redirect based on role
+  //       if (data.role === "admin") {
+  //         navigate("/admin"); // Redirect to Admin Dashboard
+  //       } else {
+  //         navigate("/dashboard"); // Redirect to Policyholder Dashboard
+  //       }
+  //     } else {
+  //       alert(`Error: ${data.error || "Something went wrong"}`);
+  //     }
+  //   } catch (error) {
+  //     console.error("Request failed:", error);
+  //     alert("Something went wrong. Please try again.");
+  //   }
+  // };
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     const url = isLogin
-        ? `${API_BASE_URL}/users/${formData.email}?password=${formData.password}`  // Corrected Login API
-        : `${API_BASE_URL}/users`;  // Corrected Register API
+      ? `${API_BASE_URL}/users/${formData.email}?password=${formData.password}`
+      : `${API_BASE_URL}/users`;
 
     try {
         const response = await fetch(url, {
-            method: isLogin ? "GET" : "POST",  // GET for login, POST for register
+            method: isLogin ? "GET" : "POST",
             headers: { "Content-Type": "application/json" },
-            body: isLogin ? null : JSON.stringify(formData),  // No body for GET request
+            body: isLogin ? null : JSON.stringify(formData),
         });
 
         const data = await response.json();
-        console.log("API Response:", data); // Debugging
+        console.log("Full API Response:", data); // ✅ Debugging: Check full response
 
-        if (response.ok) {
-            if (isLogin) {
-                // 🔹 Step 1: Store JWT token
-                localStorage.setItem("token", data.token);
-                localStorage.setItem("role", data.role); // Store role as well
+        // ✅ Verify that "user" exists in the response
+        if (response.ok && data.user) {  
+            console.log("User Object:", data.user);
+            console.log("Extracted Role:", data.user.role);
 
-                // 🔹 Step 2: Redirect based on role
-                if (data.role === "admin") {
-                    window.location.href = "/admin"; // Redirect to Admin Dashboard
-                } else {
-                    window.location.href = "/dashboard"; // Redirect to Policyholder Dashboard
-                }
+            localStorage.setItem("role", data.user.role);
+            localStorage.setItem("userEmail", formData.email);
 
-                alert("Login Successful!");
+            // ✅ Redirect based on role
+            if (data.user.role === "admin") {
+                navigate("/admin");
             } else {
-                alert("Registration Successful! Please log in.");
-                setIsLogin(true); // Redirect to login page after registration
+                navigate("/dashboard");
             }
         } else {
-            alert(`Error: ${data.error || "Something went wrong"}`);
+            console.error("Role missing in response:", data);
+            alert("Login failed. Please try again.");
         }
     } catch (error) {
         console.error("Request failed:", error);
         alert("Something went wrong. Please try again.");
     }
 };
+
+
 
 
   return (
