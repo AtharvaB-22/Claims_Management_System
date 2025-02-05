@@ -1,37 +1,21 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import AuthPage from "../pages/AuthPage";
-import Dashboard from "../pages/Dashboard";
-import AdminPage from "../pages/AdminPage";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ClaimDetails from "../pages/ClaimDetails";
+import AuthPage from "../pages/AuthPage";
+import AdminPage from "../pages/AdminPage";
+import Dashboard from "../pages/Dashboard";
 
-const AppRouter = () => {
-  const role = localStorage.getItem("role"); // Get role from localStorage
-
+const AppRoutes = () => {
   return (
     <Router>
       <Routes>
-        {/* <Route path="/" element={<AuthPage />} /> */}
-        {/* <Route path="/dashboard" element={role === "policyholder" ? <Dashboard /> : <Navigate to="/" />} /> */}
-
-      {/* <Route path="/" element={<Dashboard />} />
-      <Route path="/auth" element={<AuthPage />} /> */}
-
-      {/* <Route path="/" element={<ClaimDetails />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/auth" element={<AuthPage />} />  */}
-
-      <Route path="/" element={<AdminPage />} />
-
-      {/* Keep other pages accessible */}
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/auth" element={<AuthPage />} />
-      <Route path="/claims" element={<ClaimDetails />} />
-
-        <Route path="/admin" element={role === "admin" ? <AdminPage /> : <Navigate to="/" />} />
-        <Route path="/claims" element={<ClaimDetails />} />
+        {/* ✅ ClaimDetails is the default page for testing */}
+        <Route path="/" element={<ClaimDetails />} />
+        <Route path="/auth" element={<AuthPage />} />
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </Router>
   );
 };
 
-export default AppRouter;
+export default AppRoutes;

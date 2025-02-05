@@ -8,7 +8,7 @@ export default function Dashboard() {
   useEffect(() => {
     // Dummy data for now (Backend will be integrated later)
     setUser({ name: "John Doe", email: "johndoe@example.com" });
-    setRole("admin"); // Change to "admin" to test Admin View
+    setRole("policyholder"); // Change to "admin" to test Admin View
 
     setPolicies([
       { id: 1, type: "Health", coverage: "$5000" },
