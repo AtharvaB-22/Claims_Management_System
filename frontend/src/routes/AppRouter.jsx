@@ -3,6 +3,7 @@ import ClaimDetails from "../pages/ClaimDetails";
 import AuthPage from "../pages/AuthPage";
 import AdminPage from "../pages/AdminPage";
 import Dashboard from "../pages/Dashboard";
+import BuyPolicy from "../pages/BuyPolicy";
 
 const AppRoutes = () => {
   return (
@@ -13,6 +14,7 @@ const AppRoutes = () => {
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/buy-policy" element={<BuyPolicy />} />
       </Routes>
     </Router>
   );

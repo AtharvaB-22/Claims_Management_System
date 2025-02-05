@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // ✅ Added for navigation
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [policies, setPolicies] = useState([]);
   const [role, setRole] = useState(""); // Role State
+  const navigate = useNavigate(); // ✅ Navigation Hook
 
   useEffect(() => {
     // Dummy data for now (Backend will be integrated later)
@@ -47,13 +49,22 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* File a Claim Button */}
-            <div className="flex justify-center mt-6">
+            {/* Action Buttons */}
+            <div className="flex flex-col items-center mt-6 space-y-4">
+              {/* File a Claim Button */}
               <button
-                className="bg-[#0568a6] text-white px-6 py-3 rounded-md hover:bg-[#248e38] transition text-lg font-semibold"
+                className="bg-[#0568a6] text-white px-6 py-3 rounded-md hover:bg-[#248e38] transition text-lg font-semibold w-2/3"
                 onClick={() => alert("Redirect to claim form")}
               >
                 File a New Claim
+              </button>
+
+              {/* Buy a New Policy Button */}
+              <button
+                className="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 transition text-lg font-semibold w-2/3"
+                onClick={() => navigate("/buy-policy")} // ✅ Navigates to Buy Policy Page
+              >
+                ➕ Buy a New Policy
               </button>
             </div>
           </>
