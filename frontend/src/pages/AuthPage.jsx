@@ -1,4 +1,5 @@
 import { useState } from "react";
+import API_BASE_URL from "../config";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -14,25 +15,48 @@ export default function AuthPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     const url = isLogin
-      ? "https://claims-management-system-gpit.onrender.com/users/login"
-      : "https://claims-management-system-gpit.onrender.com/users/register";
+        ? `${API_BASE_URL}/users/${formData.email}?password=${formData.password}`  // Corrected Login API
+        : `${API_BASE_URL}/users`;  // Corrected Register API
 
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+        const response = await fetch(url, {
+            method: isLogin ? "GET" : "POST",  // GET for login, POST for register
+            headers: { "Content-Type": "application/json" },
+            body: isLogin ? null : JSON.stringify(formData),  // No body for GET request
+        });
 
-      const data = await response.json();
-      console.log(data);
-      alert(isLogin ? "Login successful!" : "Registration successful!");
+        const data = await response.json();
+        console.log("API Response:", data); // Debugging
+
+        if (response.ok) {
+            if (isLogin) {
+                // 🔹 Step 1: Store JWT token
+                localStorage.setItem("token", data.token);
+                localStorage.setItem("role", data.role); // Store role as well
+
+                // 🔹 Step 2: Redirect based on role
+                if (data.role === "admin") {
+                    window.location.href = "/admin"; // Redirect to Admin Dashboard
+                } else {
+                    window.location.href = "/dashboard"; // Redirect to Policyholder Dashboard
+                }
+
+                alert("Login Successful!");
+            } else {
+                alert("Registration Successful! Please log in.");
+                setIsLogin(true); // Redirect to login page after registration
+            }
+        } else {
+            alert(`Error: ${data.error || "Something went wrong"}`);
+        }
     } catch (error) {
-      console.error("Error:", error);
-      alert("Something went wrong.");
+        console.error("Request failed:", error);
+        alert("Something went wrong. Please try again.");
     }
-  };
+};
+
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
