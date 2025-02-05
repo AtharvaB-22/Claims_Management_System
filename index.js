@@ -38,14 +38,19 @@ console.log("Swagger documentation available at /api-docs");
 
 const allowedOrigins = [
     'https://your-frontend-domain.com',
-    'http://localhost:3001' // for local development
+    'http://localhost:3001' , // for local development
+    'http://localhost:5173'  // Add this for Vite frontend
 ];
 
 app.use(cors({
     origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
 }));
+
+// app.use(cors());
+
 
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
