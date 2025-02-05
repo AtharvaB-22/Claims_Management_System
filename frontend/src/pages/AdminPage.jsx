@@ -79,12 +79,13 @@ export default function AdminPage() {
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-4xl">
         <h2 className="text-2xl font-bold text-center text-[#0568a6] mb-4">
           Admin Dashboard
-          <button
-            className="bg-red-500 text-white px-4 py-2 rounded"
-            onClick={handleLogout}
-          >
-            Logout
+          <button 
+              className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 text-sm rounded-md hover:bg-red-700"
+              onClick={handleLogout}
+            >
+              Logout
           </button>
+
         </h2>
 
         {/* User Management Section */}

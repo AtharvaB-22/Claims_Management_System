@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // ✅ Added for navigation
+import API_BASE_URL from "../config";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -9,14 +10,19 @@ export default function Dashboard() {
 
   useEffect(() => {
     // Dummy data for now (Backend will be integrated later)
-    setUser({ name: "John Doe", email: "johndoe@example.com" });
-    setRole("policyholder"); // Change to "admin" to test Admin View
+    const storedName = localStorage.getItem("name");
+    const storedEmail = localStorage.getItem("email");
+    const storedRole = localStorage.getItem("role");
 
-    setPolicies([
-      { id: 1, type: "Health", coverage: "$5000" },
-      { id: 2, type: "Vehicle", coverage: "$10,000" }
-    ]);
+    setUser({ name: storedName || "Guest", email: storedEmail || "No Email" });
+    setRole(storedRole || "policyholder"); 
+
+    fetch(`${API_BASE_URL}/policies?email=${storedEmail}`)
+      .then((res) => res.json())
+      .then((data) => setPolicies(data))
+      .catch((err) => console.error("Error fetching policies:", err));
   }, []);
+  
   const handleLogout = () => {
     localStorage.removeItem("role");
     localStorage.removeItem("email");
@@ -28,11 +34,11 @@ export default function Dashboard() {
       <div className="w-full max-w-4xl bg-white p-8 rounded-lg shadow-md mt-10">
         <h2 className="text-3xl font-bold text-center text-[#0568a6] mb-6">
           {role === "policyholder" ? "Policyholder Dashboard" : "Admin Dashboard"}
-          <button
-            className="bg-red-500 text-white px-4 py-2 rounded"
-            onClick={handleLogout}
-          >
-            Logout
+          <button 
+                className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 text-sm rounded-md hover:bg-red-700"
+                onClick={handleLogout}
+              >
+              Logout
           </button>
         </h2>
 
@@ -51,8 +57,10 @@ export default function Dashboard() {
             <div className="mt-6">
               <h3 className="text-lg font-bold text-gray-800 mb-2">Your Policies:</h3>
               <div className="grid grid-cols-2 gap-4">
-                {policies.map((policy) => (
-                  <div key={policy.id} className="bg-gray-200 p-4 rounded-lg">
+              {policies.map((policy, index) => (
+              <div key={policy.id || index} className="bg-gray-200 p-4 rounded-lg">
+                {/* {policies.map((policy) => (
+                  <div key={policy.id}  */}
                     <p className="text-lg font-semibold">{policy.type} Insurance</p>
                     <p className="text-gray-700">Coverage: {policy.coverage}</p>
                   </div>

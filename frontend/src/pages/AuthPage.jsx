@@ -22,7 +22,6 @@ export default function AuthPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // const handleSubmit = async (e) => {
   //   e.preventDefault();
     
   //   const url = isLogin
@@ -80,11 +79,13 @@ export default function AuthPage() {
         // ✅ Verify that "user" exists in the response
         if (response.ok && data.user) {  
           if (isLogin) {
-            console.log("User Object:", data.user);
-            console.log("Extracted Role:", data.user.role);
 
             localStorage.setItem("role", data.user.role);
             localStorage.setItem("userEmail", formData.email);
+            localStorage.setItem("name", data.user.name);
+            localStorage.setItem("email", data.user.email);
+            // localStorage.setItem("role", user.role);
+            // console.log("User Data Stored:", data.user);
 
             // ✅ Redirect based on role
             if (data.user.role === "admin") {
@@ -105,9 +106,6 @@ export default function AuthPage() {
         alert("Something went wrong. Please try again.");
     }
 };
-
-
-
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
