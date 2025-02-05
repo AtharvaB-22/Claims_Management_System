@@ -64,21 +64,22 @@ export default function AuthPage() {
     e.preventDefault();
     
     const url = isLogin
-      ? `${API_BASE_URL}/users/${formData.email}?password=${formData.password}`
-      : `${API_BASE_URL}/users`;
+    ? `${API_BASE_URL}/users/${formData.email}?password=${formData.password}`  // Corrected Login API
+    : `${API_BASE_URL}/users`;  // Corrected Register API
 
     try {
-        const response = await fetch(url, {
-            method: isLogin ? "GET" : "POST",
-            headers: { "Content-Type": "application/json" },
-            body: isLogin ? null : JSON.stringify(formData),
-        });
+      const response = await fetch(url, {
+        method: isLogin ? "GET" : "POST",  // GET for login, POST for register
+        headers: { "Content-Type": "application/json" },
+        body: isLogin ? null : JSON.stringify(formData),  // No body for GET request
+    });
 
         const data = await response.json();
         console.log("Full API Response:", data); // ✅ Debugging: Check full response
 
         // ✅ Verify that "user" exists in the response
         if (response.ok && data.user) {  
+          if (isLogin) {
             console.log("User Object:", data.user);
             console.log("Extracted Role:", data.user.role);
 
@@ -91,9 +92,13 @@ export default function AuthPage() {
             } else {
                 navigate("/dashboard");
             }
-        } else {
-            console.error("Role missing in response:", data);
-            alert("Login failed. Please try again.");
+        }else {
+          alert("Registration Successful! Please log in.");
+          setIsLogin(true); // Redirect to login page after registration
+        }
+      } else {
+          console.error("Role missing in response:", data);
+            alert(`Error: ${data.error || "Something went wrong"}`);
         }
     } catch (error) {
         console.error("Request failed:", error);
