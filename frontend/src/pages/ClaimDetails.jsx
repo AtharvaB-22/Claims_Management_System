@@ -14,8 +14,8 @@ export default function ClaimDetails() {
   const [policies, setPolicies] = useState([]); // Store user policies
   const [selectedPolicy, setSelectedPolicy] = useState(null);
   const [errorMessage, setErrorMessage] = useState(""); // Error messages
-  const [claimAmount, setClaimAmount] = useState("");
-  const [reason, setReason] = useState("");
+  // const [claimAmount, setClaimAmount] = useState("");
+  // const [reason, setReason] = useState("");
   const [supportingDocuments, setSupportingDocuments] = useState([]);
   const userId = localStorage.getItem("userId");
   const navigate = useNavigate();

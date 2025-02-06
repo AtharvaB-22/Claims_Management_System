@@ -128,7 +128,7 @@ router.get("/", async (req, res) => {
 // Get Claim by ID
 router.get("/:id", async (req, res) => {
     try {
-        const claim = await Claim.findOne({ claimId: req.params.id });
+        const claim = await Claim.find({ claimId: req.params.id });
         if (!claim) {
             return res.status(404).json({ error: "Claim not found" });
         }
