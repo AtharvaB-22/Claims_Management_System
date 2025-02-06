@@ -37,9 +37,9 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 console.log("Swagger documentation available at /api-docs");
 
 const allowedOrigins = [
-    'https://your-frontend-domain.com',
+    'https://claims-management-system-frontend.onrender.com',
     'http://localhost:3001' , // for local development
-    'http://localhost:5173'  // Add this for Vite frontend
+    'http://localhost:5173', // Add this for Vite frontend
 ];
 
 app.use(cors({
