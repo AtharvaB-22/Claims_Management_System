@@ -81,7 +81,7 @@ export default function Dashboard() {
                 <div key={policy.id ||index} className="bg-gray-200 p-4 rounded-lg">
                   <div className="policy-card">
                     <h3>{policy.policyType} Insurance</h3> {/* ✅ Shows the Policy Name */}
-                    <p>Coverage: ${policy.coverageAmount.toLocaleString()}</p> {/* ✅ Adds Comma Formatting */}
+                    <p>Coverage: Rs.{policy.coverageAmount.toLocaleString()}</p> {/* ✅ Adds Comma Formatting */}
                 </div>
                 </div>
               ))}
